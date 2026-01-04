@@ -1,3 +1,4 @@
+import { PasscodeInput } from '../components/PasscodeInput'
 import { useState } from 'react'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -51,81 +52,51 @@ function VouchEntryPage() {
   // SUCCESS VIEW
   if (isSuccess) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center p-4">
-        <div className="w-full max-w-md animate-in zoom-in duration-300 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900">Neighbor Verified!</h1>
-          <p className="mt-2 text-slate-500">
-            You've officially welcomed a new neighbor to the community.
-          </p>
-        </div>
+      <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-3xl font-serif text-[#2D2D2D] mb-4">Neighborhood Expanded</h1>
+        <p className="text-[#6B6658] text-sm italic mb-10">"Their residency is now verified by your word."</p>
+        <button onClick={() => navigate({ to: '/' })} className="btn-primary px-8">Finish</button>
       </div>
     )
   }
 
-  // INPUT VIEW
   return (
-    <div className="flex min-h-[80vh] items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
+    <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        
+        <header className="text-center mb-10">
+          <div className="inline-block px-3 py-1 bg-[#EBE7DE] rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#6B6658] mb-4">
+            Security: Handshake
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Handshake</h1>
-          <p className="mt-2 text-slate-500">
-            Enter the 6-digit code from your neighbor's device to verify their residency.
-          </p>
+          <h1 className="text-3xl font-serif text-[#2D2D2D]">Vouch for Neighbor</h1>
+        </header>
+  
+        {/* The Unified Artisan Card */}
+        <div className="artisan-card p-2 bg-white border-t-4 border-[#4A5D4E]">
+          <div className="bg-[#F2F0E9]/50 rounded-[1.8rem] py-10 px-6">
+            <form onSubmit={handleSubmit} className="space-y-10">
+              <PasscodeInput 
+                value={code} 
+                onChange={setCode} 
+                disabled={vouchMutation.isPending} 
+              />
+  
+              <button
+                type="submit"
+                disabled={code.length < 6 || vouchMutation.isPending}
+                className="btn-primary w-full py-4 text-xs tracking-[0.1em] shadow-xl shadow-[#4A5D4E]/10"
+              >
+                {vouchMutation.isPending ? 'VERIFYING...' : 'AUTHORIZE ACCESS'}
+              </button>
+            </form>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="••••••"
-              className="block w-full rounded-2xl border-2 border-slate-100 bg-slate-50 py-5 text-center text-5xl font-mono font-bold tracking-[0.2em] text-indigo-600 transition-all focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
-              autoFocus
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={code.length < 6 || vouchMutation.isPending}
-            className="group relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-indigo-600 py-4 text-lg font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:grayscale"
-          >
-            {vouchMutation.isPending ? (
-              <span className="flex items-center gap-2">
-                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Verifying...
-              </span>
-            ) : (
-              'Vouch for Neighbor'
-            )}
-          </button>
-        </form>
-
-        {vouchMutation.isError && (
-          <div className="mt-6 flex items-start gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-100 animate-shake">
-            <span className="text-lg">⚠️</span>
-            <p className="font-medium">{vouchMutation.error.message}</p>
-          </div>
-        )}
-
+  
         <button
           onClick={() => navigate({ to: '/dashboard' })}
-          className="mt-6 w-full text-sm font-medium text-slate-400 transition-colors hover:text-slate-600"
+          className="mt-8 w-full text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] hover:text-[#6B6658]"
         >
-          Nevermind, go back
+          Cancel and Return
         </button>
       </div>
     </div>

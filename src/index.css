@@ -1,1 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap');
+
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    /* Nestig-style "Linen" background */
+    @apply bg-[#F9F7F2] text-[#2D2D2D] antialiased;
+    font-family: 'Inter', sans-serif; /* Your clean UI font */
+  }
+
+  /* Refined Serif for headings - you can import Lora via Google Fonts */
+  h1, h2, h3, .font-serif {
+    font-family: 'Lora', serif;
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  /* The "Artisan Card" - soft depth instead of harsh lines */
+  .artisan-card {
+    @apply bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#EBE7DE];
+  }
+
+  /* The "Primary Action" - Muted Forest Green */
+  .btn-primary {
+    @apply bg-[#4A5D4E] text-[#F9F7F2] rounded-full px-8 py-4 font-medium 
+           transition-all duration-300 hover:bg-[#3d4d40] active:scale-[0.98] 
+           disabled:opacity-40 disabled:grayscale;
+  }
+
+  /* The "Secondary Action" - Warm Terracotta */
+  .btn-secondary {
+    @apply bg-[#BC6C4D] text-white rounded-full px-8 py-4 font-medium 
+           transition-all duration-300 hover:bg-[#a55e42] active:scale-[0.98];
+  }
+  
+  /* The Artisan Input */
+  .artisan-input {
+    @apply w-full bg-white border-2 border-[#EBE7DE] rounded-2xl px-5 py-4 
+           outline-none transition-all focus:border-[#4A5D4E] placeholder:text-[#A09B8E];
+  }
+}

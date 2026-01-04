@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { Passcode } from '../components/Passcode'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate, useRouter, redirect } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
@@ -12,6 +13,64 @@ export const Route = createFileRoute('/_auth/vouch-pending')({
   },
   component: VouchPendingPage,
 })
+
+// Displays the current security status in an elegant, context-aware pill
+function SecurityBadge({ isExpired }: { isExpired: boolean }) {
+  const status = isExpired ? 'Expired' : 'Pending';
+  
+  return (
+    <div className="inline-block px-3 py-1 bg-[#EBE7DE] rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#6B6658] mb-4 animate-in fade-in duration-500">
+      Security Status: {status}
+    </div>
+  );
+}
+
+interface VouchActionProps {
+  isExpired: boolean;
+  isPending: boolean;
+  onAction: () => void;
+}
+
+// Manages the call-to-action based on the security state
+function VouchAction({ isExpired, isPending, onAction }: VouchActionProps) {
+  if (isExpired) {
+    return (
+      <button 
+        onClick={onAction}
+        disabled={isPending}
+        className="mt-8 btn-primary w-full py-3 text-xs shadow-xl shadow-[#BC6C4D]/10"
+      >
+        {isPending ? 'Generating...' : 'Generate New Code'}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-12 space-y-6 animate-in fade-in">
+      <p className="text-[11px] text-[#A09B8E] leading-relaxed italic px-8">
+        "Present this code to a verified neighbor to authenticate your profile."
+      </p>
+      <button 
+        onClick={onAction}
+        disabled={isPending}
+        className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#4A5D4E] border-b border-[#4A5D4E] pb-1 transition-opacity hover:opacity-70"
+      >
+        {isPending ? 'Refreshing...' : 'Reset Security Code'}
+      </button>
+    </div>
+  );
+}
+
+// Handles the elegant display of the remaining time
+function TimerLabel({ minutes, isExpired }: { minutes: number | null; isExpired: boolean }) {
+  if (isExpired || minutes === null || minutes <= 0) return null;
+
+  return (
+    <p className="mt-8 text-[10px] uppercase tracking-widest text-[#BC6C4D] font-bold animate-pulse">
+      Expires in {minutes} {minutes === 1 ? 'minute' : 'minutes'}
+    </p>
+  );
+}
 
 function VouchPendingPage() {
   const queryClient = useQueryClient()
@@ -38,6 +97,25 @@ function VouchPendingPage() {
     },
   })
 
+  // We use state to track the "now" value, initialized to null to avoid hydration flickers
+  const [minutesRemaining, setMinutesRemaining] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!membership?.vouch_code_expires_at) return
+
+    const expiry = new Date(membership.vouch_code_expires_at).getTime()
+    
+    const updateTimer = () => {
+      const now = Date.now() // Impure call is now safely inside an effect
+      const diff = Math.max(0, Math.round((expiry - now) / 60000))
+      setMinutesRemaining(diff)
+    }
+
+    updateTimer() // Initial check
+    const interval = setInterval(updateTimer, 30000) // Update every 30 seconds
+    return () => clearInterval(interval)
+  }, [membership?.vouch_code_expires_at])
+  
   // 2. REALTIME LISTENER: Listen for the moment a neighbor vouches for you
   useEffect(() => {
     if (!membership?.id) return
@@ -56,7 +134,7 @@ function VouchPendingPage() {
         if (payload.new.status === 'active') {
           await queryClient.invalidateQueries()
           await router.invalidate()
-          navigate({ to: '/dashboard' })
+          window.location.replace('/') // Redirect to dashboard
         }
       }
     )
@@ -80,66 +158,59 @@ function VouchPendingPage() {
     },
   })
 
-  if (isLoading) return <div className="p-8 text-center animate-pulse">Checking status...</div>
+  if (isLoading) return <div className="p-8 text-center animate-pulse text-[#6B6658]">Verifying Security Status...</div>
 
   const activeCode = membership?.vouch_verification_code
-  const isExpired = membership?.vouch_code_expires_at 
-    ? new Date(membership.vouch_code_expires_at) < new Date() 
-    : true
+  // Use the timer state to determine expiration
+  const isExpired = minutesRemaining === 0 || (!activeCode && !isLoading)
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+    <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-full max-w-sm">
         
-        {/* Header Icon & Title */}
-        <div className="mb-6">
-          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-            </svg>
+      <header className="mb-10">
+        <SecurityBadge isExpired={isExpired} />
+        
+        <h1 className="text-3xl font-serif text-[#2D2D2D]">Verification Pass</h1>
+        
+        <p className="mt-4 text-sm text-[#6B6658] leading-relaxed px-4">
+          {isExpired 
+            ? "Your security code has expired. Please generate a new one."
+            : "A verified neighbor must confirm your residency in person."}
+        </p>
+      </header>
+
+        <div className={`artisan-card p-2 bg-white border-t-4 ${isExpired ? 'border-[#BC6C4D]' : 'border-[#4A5D4E]'}`}>
+          <div className="bg-[#F2F0E9]/50 rounded-[1.8rem] py-10 px-6">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#A09B8E] block mb-6">
+              Resident Security Code
+            </span>
+            
+            <Passcode code={activeCode} isExpired={isExpired} />
+            
+            <TimerLabel minutes={minutesRemaining} isExpired={isExpired} />
+
+            {isExpired && (
+              <VouchAction 
+                isExpired={true} 
+                isPending={requestVouch.isPending} 
+                onAction={() => requestVouch.mutate()} 
+              />
+            )}
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Neighbor Verification</h1>
-          <p className="text-slate-500 mt-2">
-            Since you are joining from a distance, we need a local neighbor to vouch for you in person.
-          </p>
         </div>
 
-        {/* Handshake Code Area */}
-        {activeCode && !isExpired ? (
-          <div className="space-y-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Your Handshake Code</p>
-            <div className="text-5xl font-mono font-bold tracking-[0.2em] text-indigo-600 bg-indigo-50/50 border-2 border-dashed border-indigo-200 py-6 rounded-xl">
-              {activeCode}
-            </div>
-            <p className="text-xs text-slate-400">
-              Code expires at {new Date(membership.vouch_code_expires_at!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {!isExpired && (
+          <div className="mt-12 space-y-6">
+            <p className="text-[11px] text-[#A09B8E] leading-relaxed italic px-8">
+              "Present this code to a verified neighbor to authenticate your profile."
             </p>
             <button 
               onClick={() => requestVouch.mutate()}
-              disabled={requestVouch.isPending}
-              className="text-indigo-600 text-sm font-medium hover:text-indigo-700 hover:underline pt-4"
+              className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#4A5D4E] border-b border-[#4A5D4E] pb-1"
             >
-              {requestVouch.isPending ? 'Generating...' : 'Refresh Code'}
+              Reset Security Code
             </button>
-          </div>
-        ) : (
-          <div className="py-4">
-            <button
-              onClick={() => requestVouch.mutate()}
-              disabled={requestVouch.isPending}
-              className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all shadow-md active:scale-[0.98]"
-            >
-              {requestVouch.isPending ? 'Generating Code...' : 'Get Handshake Code'}
-            </button>
-            <p className="mt-4 text-xs text-slate-400 leading-relaxed">
-              Show this code to any active neighbor. Once they enter it on their device, you'll be granted full access.
-            </p>
-          </div>
-        )}
-
-        {requestVouch.isError && (
-          <div className="mt-4 p-3 bg-red-50 rounded-lg text-red-600 text-sm">
-            {requestVouch.error.message}
           </div>
         )}
       </div>

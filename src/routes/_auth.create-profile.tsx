@@ -18,11 +18,12 @@ function CreateProfileComponent() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { profile } = Route.useRouteContext()
   
   // --- Form State ---
-  const [name, setName] = useState('')
+  const [name, setName] = useState(profile?.display_name || '')
   const [neighborhoodName, setNeighborhoodName] = useState('')
-  const [address, setAddress] = useState('')
+  const [address, setAddress] = useState(profile?.address || '')
   const [inviteCode, setInviteCode] = useState('')
   const [coords, setCoords] = useState<Coords | null>(null)
   
@@ -33,6 +34,7 @@ function CreateProfileComponent() {
   const [isValidatingLocation, setIsValidatingLocation] = useState(false)
 
   // --- 1. Clean Debounced Effect ---
+
   useEffect(() => {
     if (address.length < 5) {
       setCoords(null)
@@ -49,6 +51,19 @@ function CreateProfileComponent() {
     return () => clearTimeout(delayDebounceFn)
   }, [address])
 
+  const updateProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        display_name: name, 
+        address: address // This ensures the latest address is saved
+      })
+      .eq('user_id', user?.id);
+    
+    if (error) throw error;
+  };
+
   // --- 2. Join Path ---
   const handleJoin = async () => {
     if (!inviteCode || !coords) return
@@ -56,6 +71,8 @@ function CreateProfileComponent() {
     setError(null)
 
     try {
+      await updateProfile();
+
       const { data: status, error: rpcError } = await supabase.rpc('join_neighborhood', {
         invite_code_text: inviteCode.trim().toUpperCase(),
         user_lat: coords.lat,
@@ -67,7 +84,7 @@ function CreateProfileComponent() {
       await queryClient.invalidateQueries()
       await router.invalidate()
 
-      navigate({ to: status === 'active' ? '/dashboard' : '/vouch-pending' })
+      window.location.replace('/')
     } catch (err: any) {
       setError(err.message || 'Failed to join neighborhood')
       setStep('choice')
@@ -81,14 +98,7 @@ function CreateProfileComponent() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ display_name: name, address: address })
-        .eq('user_id', user?.id)
-
-      if (profileError) throw profileError
+      await updateProfile();
 
       const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
         neighborhood_name: neighborhoodName.trim(),
@@ -109,7 +119,7 @@ function CreateProfileComponent() {
 
       await queryClient.invalidateQueries()
       await router.invalidate()
-      navigate({ to: '/dashboard' })
+      window.location.replace('/')
     } catch (err: any) {
       setError(err.message || 'Failed to create neighborhood')
       setStep('choice')
@@ -117,135 +127,203 @@ function CreateProfileComponent() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-3xl shadow-xl border border-slate-100">
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">Complete your profile</h1>
-      <p className="text-slate-500 text-sm mb-6">Connect with neighbors in your area.</p>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100">
-          {error}
-        </div>
-      )}
-
-      {step === 'name' && (
-        <div className="space-y-4">
-          <label className="block text-sm font-medium text-slate-700">Your Name</label>
-          <input
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-            placeholder="e.g. Jane Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <button 
-            onClick={() => setStep('choice')}
-            disabled={name.length < 2}
-            className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50"
-          >
-            Continue
-          </button>
-        </div>
-      )}
-
-      {/* STEP 2: Choice, Address & Specific Inputs */}
-      {step === 'choice' && (
-        <div className="space-y-6">
-          {/* Toggle Switch */}
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            <button 
-              type="button"
-              onClick={() => {
-                console.log("Switching to JOIN");
-                setMethod('join');
-                setError(null);
-              }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${method === 'join' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
-            >
-              Join with Code
-            </button>
-            <button 
-              type="button"
-              onClick={() => {
-                console.log("Switching to CREATE");
-                setMethod('create');
-                setError(null);
-              }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${method === 'create' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
-            >
-              Start New Group
-            </button>
+    <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center pt-12 pb-20 px-6">
+      <div className="w-full max-w-sm">
+        
+        {/* Error Messaging */}
+        {error && (
+          <div className="mb-8 p-4 bg-[#FFF5F2] text-[#BC6C4D] rounded-2xl text-xs font-medium border border-[#BC6C4D]/20 animate-in fade-in zoom-in">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
           </div>
+        )}
 
-          <div className="space-y-4">
-            {/* 1. Common Field: Address */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Home Address</label>
-              <div className="relative">
+        {/* --- STEP 1: IDENTITY --- */}
+        {step === 'name' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <header className="text-center mb-10">
+              <div className="inline-block px-3 py-1 bg-[#EBE7DE] rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#6B6658] mb-4">
+                {profile?.display_name ? 'Identity Confirmation' : 'Step 01 — Identity'}
+              </div>
+              
+              <h1 className="text-4xl font-serif text-[#2D2D2D] mb-3">
+                {profile?.display_name ? 'Confirm Profile' : 'Resident Profile'}
+              </h1>
+              
+              <p className="text-[#6B6658] text-sm leading-relaxed px-4">
+                {profile?.display_name 
+                  ? 'Review your details before proceeding to your neighborhood.' 
+                  : 'Please provide your details as they should appear to your neighbors.'}
+              </p>
+            </header>
+
+            <div className="artisan-card p-8 space-y-8">
+              {/* Full Name Field */}
+              <div className="group">
+                <label className="block text-[10px] uppercase tracking-[0.15em] font-bold text-[#A09B8E] mb-3 ml-1">
+                  Full Name
+                </label>
                 <input
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="123 Neighborhood St, City"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  className="artisan-input text-sm"
+                  placeholder="e.g. Julianne Graham"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
-                <div className="absolute right-4 top-4">
-                  {isValidatingLocation && <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full" />}
-                  {!isValidatingLocation && coords && <span className="text-green-500">✓</span>}
+              </div>
+
+              {/* Address Field */}
+              <div className="group">
+                <label className="block text-[10px] uppercase tracking-[0.15em] font-bold text-[#A09B8E] mb-3 ml-1">
+                  Residential Address
+                </label>
+                <div className="relative">
+                  <input
+                    className={`artisan-input text-sm pr-12 transition-all duration-500 ${
+                      coords ? 'border-[#4A5D4E]/40 bg-[#F2F0E9]/40' : ''
+                    }`}
+                    placeholder="Search your street address..."
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                  
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                    {isValidatingLocation && (
+                      <div className="h-4 w-4 border-2 border-[#4A5D4E] border-t-transparent rounded-full animate-spin" />
+                    )}
+                    {coords && !isValidatingLocation && (
+                      <div className="text-[#4A5D4E] animate-in zoom-in duration-300">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                
+                {/* Verification Badge */}
+                {coords && (
+                  <p className="mt-3 text-[10px] text-[#4A5D4E] font-bold flex items-center gap-1.5 ml-1 animate-in fade-in slide-in-from-left-2">
+                    <span className="h-1 w-1 bg-[#4A5D4E] rounded-full"></span>
+                    LOCATION VERIFIED
+                  </p>
+                )}
+              </div>
+
+              {/* Primary Action */}
+              <div className="pt-2">
+                <button 
+                  onClick={() => setStep('choice')}
+                  disabled={name.length < 2 || !coords || isValidatingLocation}
+                  className="btn-primary w-full shadow-xl shadow-[#4A5D4E]/10 flex items-center justify-center"
+                >
+                  {profile?.display_name ? 'Confirm & Continue' : 'Continue to Access'}
+                </button>
               </div>
             </div>
             
-            {/* 2. Conditional Field: JOIN (Invite Code) */}
-            {method === 'join' && (
-              <div className="pt-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Invite Code</label>
-                <input
-                  className="w-full p-4 border-2 border-indigo-100 rounded-xl outline-none focus:border-indigo-500 uppercase font-mono text-center text-lg"
-                  placeholder="CODE123"
-                  maxLength={8}
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                />
-              </div>
-            )}
-
-            {/* 3. Conditional Field: CREATE (Neighborhood Name) */}
-            {method === 'create' && (
-              <div className="pt-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Neighborhood Name</label>
-                <input
-                  className="w-full p-4 border-2 border-indigo-100 rounded-xl outline-none focus:border-indigo-500"
-                  placeholder="e.g. Oak Street Collective"
-                  value={neighborhoodName}
-                  onChange={(e) => setNeighborhoodName(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* 4. The Action Button */}
-            <button 
-              onClick={() => {
-                console.log("Submit clicked. Method:", method, "Coords:", coords, "Name:", neighborhoodName);
-                method === 'join' ? handleJoin() : handleCreate();
-              }}
-              disabled={
-                !coords || 
-                (method === 'join' && !inviteCode) || 
-                (method === 'create' && !neighborhoodName) ||
-                isValidatingLocation
-              }
-              className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 disabled:opacity-30 shadow-lg mt-4"
-            >
-              {method === 'join' ? 'Verify & Join' : 'Create Neighborhood'}
-            </button>
+            <footer className="mt-12 text-center">
+              <p className="text-[10px] uppercase tracking-widest text-[#A09B8E]">
+                Secure Residential Network
+              </p>
+            </footer>
           </div>
-        </div>
-      )}
+        )}
 
-      {step === 'executing' && (
-        <div className="text-center py-10">
-          <div className="animate-spin h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-slate-600 font-medium">Processing...</p>
-        </div>
-      )}
+        {/* --- STEP 2: CHOICE --- */}
+        {step === 'choice' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <header className="text-center mb-10">
+              <div className="inline-block px-3 py-1 bg-[#EBE7DE] rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#6B6658] mb-4">
+                Step 02 — Access
+              </div>
+              <h2 className="text-3xl font-serif text-[#2D2D2D] mb-3">Welcome, {name.split(' ')[0]}</h2>
+              <p className="text-[#6B6658] text-sm px-4">Select your neighborhood entry method.</p>
+            </header>
+
+            <div className="grid gap-5">
+              <button 
+                onClick={() => setMethod('join')}
+                className={`artisan-card p-6 text-left transition-all border-2 ${
+                  method === 'join' ? 'border-[#4A5D4E] bg-white' : 'border-transparent opacity-80'
+                }`}
+              >
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="h-10 w-10 rounded-full bg-[#F2F0E9] flex items-center justify-center text-[#4A5D4E]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                  </div>
+                  <h3 className="font-serif text-xl text-[#2D2D2D]">Join Existing</h3>
+                </div>
+                <p className="text-xs text-[#6B6658] leading-relaxed">I have been provided an invite code by a neighbor.</p>
+                {method === 'join' && (
+                  <div className="mt-4 pt-4 border-t border-[#F2F0E9] animate-in zoom-in">
+                    <input
+                      className="artisan-input text-lg tracking-[0.3em] uppercase placeholder:tracking-normal"
+                      placeholder="Invite Code"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    />
+                  </div>
+                )}
+              </button>
+
+              <button 
+                onClick={() => setMethod('create')}
+                className={`artisan-card p-6 text-left transition-all border-2 ${
+                  method === 'create' ? 'border-[#BC6C4D] bg-white' : 'border-transparent opacity-80'
+                }`}
+              >
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="h-10 w-10 rounded-full bg-[#F9F3F1] flex items-center justify-center text-[#BC6C4D]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                  </div>
+                  <h3 className="font-serif text-xl text-[#2D2D2D]">Establish New</h3>
+                </div>
+                <p className="text-xs text-[#6B6658] leading-relaxed">I am the first resident in this area to register.</p>
+                {method === 'create' && (
+                  <div className="mt-4 pt-4 border-t border-[#F9F3F1] animate-in zoom-in">
+                    <input
+                      className="artisan-input text-sm"
+                      placeholder="Neighborhood Name (e.g. Oak St)"
+                      value={neighborhoodName}
+                      onChange={(e) => setNeighborhoodName(e.target.value)}
+                    />
+                  </div>
+                )}
+              </button>
+            </div>
+
+            <div className="mt-10">
+              <button 
+                disabled={!method || (method === 'join' && !inviteCode) || (method === 'create' && !neighborhoodName)}
+                className="btn-primary w-full shadow-lg shadow-[#4A5D4E]/10"
+                onClick={() => method === 'join' ? handleJoin() : handleCreate()}
+              >
+                Confirm Registration
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* --- STEP 3: EXECUTING --- */}
+        {step === 'executing' && (
+          <div className="text-center py-20 animate-in fade-in">
+            <div className="h-12 w-12 border-4 border-[#4A5D4E] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h3 className="font-serif text-xl text-[#2D2D2D]">Securing Profile</h3>
+            <p className="text-sm text-[#6B6658] mt-2">Connecting to your neighborhood...</p>
+          </div>
+        )}
+
+        {/* Trust Footer */}
+        <footer className="mt-12 text-center">
+          <p className="text-[10px] uppercase tracking-widest text-[#A09B8E] opacity-60">
+            Secure Civic Network • Verified Residents Only
+          </p>
+        </footer>
+      </div>
     </div>
   )
 }

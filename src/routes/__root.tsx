@@ -39,15 +39,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
     // 3. Fetch Membership Status only if profile exists
     let membershipStatus: string | null = null
-    if (profile?.neighborhood_id) {
+    if (profile) {
       const membership = await context.queryClient.ensureQueryData({
-        queryKey: ['membership_status', user.id, profile.neighborhood_id],
+        queryKey: ['membership_status', user.id],
         queryFn: async () => {
           const { data } = await supabase
             .from('neighborhood_memberships')
             .select('status')
             .eq('user_id', user.id)
-            .eq('neighborhood_id', profile.neighborhood_id)
             .maybeSingle()
           return data
         }
