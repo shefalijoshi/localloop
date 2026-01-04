@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_auth/_app/dashboard')({
 function DashboardPage() {
   const { profile } = Route.useRouteContext()
 
-  // Fetch Neighborhood Details
+  // Logic Preserved: Neighborhood data fetch
   const { data: neighborhood } = useQuery({
     queryKey: ['neighborhood', profile?.neighborhood_id],
     queryFn: async () => {
@@ -25,54 +25,70 @@ function DashboardPage() {
   })
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <header className="mb-10">
-        <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-tight uppercase text-sm mb-1">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          {neighborhood?.name || 'Local Neighborhood'}
-        </div>
-        <h1 className="text-4xl font-extrabold text-slate-900">
-          Hello, {profile?.display_name}!
-        </h1>
-      </header>
+    <div className="min-h-screen bg-[#F9F7F2] pb-20">
+      <div className="max-w-4xl mx-auto p-6">
+        
+        {/* Simplified Header */}
+        <header className="mb-10 mt-8">
+          <div className="flex items-center gap-2 text-[#4A5D4E] font-bold tracking-[0.2em] uppercase text-[9px] mb-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-[#4A5D4E]"></span>
+            {neighborhood?.name || 'Local Neighborhood'}
+          </div>
+          <h1 className="text-3xl font-serif text-[#2D2D2D]">
+            Welcome, {profile?.display_name?.split(' ')[0]}
+          </h1>
+        </header>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Action: Invite */}
-        <div className="group relative overflow-hidden bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
-          <h3 className="text-xl font-bold mb-2">Invite Neighbors</h3>
-          <p className="text-slate-500 mb-6 leading-relaxed">
-            New members within {neighborhood?.radius_miles || '0.5'} miles join instantly.
-          </p>
+        {/* Compact Action Row */}
+        <div className="grid grid-cols-2 gap-4">
+          
+          {/* Smaller Action: Invite */}
           <Link 
             to="/invite"
-            className="inline-flex w-full items-center justify-center bg-slate-900 text-white py-4 rounded-2xl font-semibold hover:bg-slate-800 transition-all"
+            className="artisan-card group p-5 bg-white border-t-2 border-[#EBE7DE] hover:border-[#4A5D4E] transition-all"
           >
-            Generate Invite Code
+            <div className="flex flex-col h-full">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-2 group-hover:text-[#4A5D4E]">Registry</span>
+              <h3 className="text-lg font-serif text-[#2D2D2D] mb-1">Invite</h3>
+              <p className="text-[#6B6658] text-[11px] leading-snug opacity-70">
+                Add neighbors within {neighborhood?.radius_miles || '0.5'} miles.
+              </p>
+            </div>
           </Link>
-        </div>
 
-        {/* Action: Vouch */}
-        <div className="group relative overflow-hidden bg-indigo-600 p-8 rounded-3xl shadow-lg shadow-indigo-100 transition-all hover:shadow-indigo-200">
-          <h3 className="text-xl font-bold mb-2 text-white">Vouch for Neighbor</h3>
-          <p className="text-indigo-100 mb-6 leading-relaxed">
-            Verify a neighbor in person using their 6-digit handshake code.
-          </p>
+          {/* Smaller Action: Vouch */}
           <Link 
             to="/vouch"
-            className="inline-flex w-full items-center justify-center bg-white text-indigo-600 py-4 rounded-2xl font-semibold hover:bg-indigo-50 transition-all"
+            className="artisan-card group p-5 bg-white border-t-2 border-[#4A5D4E] hover:bg-[#4A5D4E]/5 transition-all"
           >
-            Enter Handshake Code
+            <div className="flex flex-col h-full">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-[#4A5D4E] mb-2">Security</span>
+              <h3 className="text-lg font-serif text-[#2D2D2D] mb-1">Vouch</h3>
+              <p className="text-[#6B6658] text-[11px] leading-snug opacity-70">
+                Verify a neighbor via handshake code.
+              </p>
+            </div>
           </Link>
         </div>
+        
+        {/* Feed Section */}
+        <section className="mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em]">Neighborhood Activity</h2>
+            <div className="h-px flex-1 bg-[#EBE7DE] ml-4 opacity-40"></div>
+          </div>
+          
+          <div className="bg-[#F2F0E9]/40 border-2 border-dashed border-[#EBE7DE] rounded-[1.5rem] py-16 text-center">
+             <p className="text-[#A09B8E] text-[9px] font-bold uppercase tracking-[0.2em]">
+               End of Registry
+             </p>
+             <p className="text-[#6B6658] text-[11px] mt-1 italic opacity-60">
+               "Activity from your neighbors will appear here."
+             </p>
+          </div>
+        </section>
+
       </div>
-      
-      {/* FEED PLACEHOLDER */}
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Recent Updates</h2>
-        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl py-20 text-center">
-           <p className="text-slate-400 font-medium">Your neighborhood feed will appear here.</p>
-        </div>
-      </section>
     </div>
   )
 }
