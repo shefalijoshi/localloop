@@ -77,7 +77,7 @@ function VouchEntryPage() {
             <form onSubmit={handleSubmit} className="space-y-10">
               <PasscodeInput 
                 value={code} 
-                onChange={setCode} 
+                onChange={handleInputChange} 
                 disabled={vouchMutation.isPending} 
               />
   
