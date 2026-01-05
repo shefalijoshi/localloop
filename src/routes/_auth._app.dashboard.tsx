@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { Dog, Clock, MapPin, ChevronRight, PlusCircle, ShieldCheck, UserPlus } from 'lucide-react'
+import { Dog, Clock, MapPin, ChevronRight, PlusCircle, ShieldCheck, UserPlus, Hand } from 'lucide-react'
 import { format, isAfter } from 'date-fns'
 
 export const Route = createFileRoute('/_auth/_app/dashboard')({
@@ -13,7 +13,6 @@ function DashboardPage() {
   const { profile } = Route.useRouteContext()
   const queryClient = useQueryClient()
   
-  // 1. Local "Now" state to trigger re-renders for passive expiry
   const [now, setNow] = useState(new Date())
 
   useEffect(() => {
@@ -23,7 +22,6 @@ function DashboardPage() {
     return () => clearInterval(timer)
   }, [])
 
-  // 2. Fetch Neighborhood Static Data
   const { data: neighborhood } = useQuery({
     queryKey: ['neighborhood', profile?.neighborhood_id],
     queryFn: async () => {
@@ -38,7 +36,24 @@ function DashboardPage() {
     enabled: !!profile?.neighborhood_id,
   })
 
-  // 3. Fetch Structured Feed via RPC
+  useEffect(() => {
+    const channel = supabase
+      .channel('public:offers')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'offers' },
+        () => {
+          // Invalidate the feed query to trigger a refresh of the counts
+          queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [queryClient])
+
   const { data: feed, isLoading } = useQuery({
     queryKey: ['neighborhood_feed', profile?.id],
     queryFn: async () => {
@@ -145,7 +160,15 @@ function DashboardPage() {
                         ) : '🐕'}
                       </div>
                       <div>
-                        <h4 className="font-serif text-[#2D2D2D]">{req.dog_name || 'Dog Walk'}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-serif text-[#2D2D2D]">{req.dog_name || 'Dog Walk'}</h4>
+                          {req.offer_count > 0 && (
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#BC6C4D] text-white rounded-full">
+                              <Hand className="w-2.5 h-2.5" />
+                              <span className="text-[9px] font-bold">{req.offer_count}</span>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-[10px] text-[#A09B8E] uppercase tracking-wide">
                           Expires {format(new Date(req.expires_at), 'p')}
                         </p>
@@ -162,7 +185,7 @@ function DashboardPage() {
         {/* Section: Neighborhood Activity */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em]">Neighborhood Activity</h2>
+            <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em]">Neighborhood Requests</h2>
             <div className="h-px flex-1 bg-[#EBE7DE] ml-4 opacity-40"></div>
           </div>
           
@@ -191,7 +214,7 @@ function DashboardPage() {
                       <div className="text-right">
                         <div className="flex items-center gap-1 justify-end text-[10px] font-bold text-[#A09B8E] uppercase tracking-tighter">
                           <Clock className="w-3 h-3" />
-                          <span>Ends {format(new Date(req.expires_at), 'p')}</span>
+                          <span>Respond by {format(new Date(req.expires_at), 'p')}</span>
                         </div>
                       </div>
                     </div>
@@ -222,7 +245,6 @@ function DashboardPage() {
           )}
         </section>
 
-        {/* Invite Footer (Registry Style) */}
         <footer className="mt-16 pt-8 border-t border-[#EBE7DE] text-center">
           <Link to="/invite" className="inline-flex items-center gap-2 text-[#A09B8E] hover:text-[#4A5D4E] transition-colors">
             <UserPlus className="w-4 h-4" />
