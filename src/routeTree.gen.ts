@@ -19,6 +19,7 @@ import { Route as AuthAppVouchRouteImport } from './routes/_auth._app.vouch'
 import { Route as AuthAppInviteRouteImport } from './routes/_auth._app.invite'
 import { Route as AuthAppDashboardRouteImport } from './routes/_auth._app.dashboard'
 import { Route as AuthAppCreateRequestRouteImport } from './routes/_auth._app.create-request'
+import { Route as AuthAppHelpDetailsCreateRouteImport } from './routes/_auth._app.help-details.create'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -68,6 +69,12 @@ const AuthAppCreateRequestRoute = AuthAppCreateRequestRouteImport.update({
   path: '/create-request',
   getParentRoute: () => AuthAppRoute,
 } as any)
+const AuthAppHelpDetailsCreateRoute =
+  AuthAppHelpDetailsCreateRouteImport.update({
+    id: '/help-details/create',
+    path: '/help-details/create',
+    getParentRoute: () => AuthAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthAppDashboardRoute
   '/invite': typeof AuthAppInviteRoute
   '/vouch': typeof AuthAppVouchRoute
+  '/help-details/create': typeof AuthAppHelpDetailsCreateRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -88,6 +96,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthAppDashboardRoute
   '/invite': typeof AuthAppInviteRoute
   '/vouch': typeof AuthAppVouchRoute
+  '/help-details/create': typeof AuthAppHelpDetailsCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,6 +110,7 @@ export interface FileRoutesById {
   '/_auth/_app/dashboard': typeof AuthAppDashboardRoute
   '/_auth/_app/invite': typeof AuthAppInviteRoute
   '/_auth/_app/vouch': typeof AuthAppVouchRoute
+  '/_auth/_app/help-details/create': typeof AuthAppHelpDetailsCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/invite'
     | '/vouch'
+    | '/help-details/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/invite'
     | '/vouch'
+    | '/help-details/create'
   id:
     | '__root__'
     | '/_auth'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
     | '/_auth/_app/dashboard'
     | '/_auth/_app/invite'
     | '/_auth/_app/vouch'
+    | '/_auth/_app/help-details/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppCreateRequestRouteImport
       parentRoute: typeof AuthAppRoute
     }
+    '/_auth/_app/help-details/create': {
+      id: '/_auth/_app/help-details/create'
+      path: '/help-details/create'
+      fullPath: '/help-details/create'
+      preLoaderRoute: typeof AuthAppHelpDetailsCreateRouteImport
+      parentRoute: typeof AuthAppRoute
+    }
   }
 }
 
@@ -222,6 +242,7 @@ interface AuthAppRouteChildren {
   AuthAppDashboardRoute: typeof AuthAppDashboardRoute
   AuthAppInviteRoute: typeof AuthAppInviteRoute
   AuthAppVouchRoute: typeof AuthAppVouchRoute
+  AuthAppHelpDetailsCreateRoute: typeof AuthAppHelpDetailsCreateRoute
 }
 
 const AuthAppRouteChildren: AuthAppRouteChildren = {
@@ -229,6 +250,7 @@ const AuthAppRouteChildren: AuthAppRouteChildren = {
   AuthAppDashboardRoute: AuthAppDashboardRoute,
   AuthAppInviteRoute: AuthAppInviteRoute,
   AuthAppVouchRoute: AuthAppVouchRoute,
+  AuthAppHelpDetailsCreateRoute: AuthAppHelpDetailsCreateRoute,
 }
 
 const AuthAppRouteWithChildren =

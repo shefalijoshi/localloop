@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { format, addMinutes } from 'date-fns'
+import { Plus } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/create-request')({
   component: CreateRequestComponent,
@@ -39,12 +40,12 @@ function CreateRequestComponent() {
   // Note: Actual calculation happens in the RPC, this is just for the "Calm UI" display
   const getExpiryPreview = () => {
     if (timeframe === 'now') {
-      return addMinutes(new Date(), 30)
+      return addMinutes(new Date(), 60)
     }
     if (scheduledTime) {
-      return addMinutes(new Date(scheduledTime), -60)
+      return addMinutes(new Date(scheduledTime), -10)
     }
-    return addMinutes(new Date(), 30)
+    return addMinutes(new Date(), 60)
   }
 
   // --- Mutation: Call the RPC ---
@@ -110,6 +111,15 @@ function CreateRequestComponent() {
                   <p className="text-center text-[9px] text-[#A09B8E] uppercase tracking-tighter">{dog.dog_size}</p>
                 </button>
               ))}
+              <button
+                onClick={() => navigate({ to: '/help-details/create' })}
+                className="flex-shrink-0 w-32 artisan-card p-3 border-2 border-dashed border-[#EBE7DE] bg-transparent flex flex-col items-center justify-center gap-2 opacity-60 hover:opacity-100 transition-all"
+              >
+                <div className="h-10 w-10 rounded-full border border-dashed border-[#A09B8E] flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-[#A09B8E]" />
+                </div>
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Add New</p>
+              </button>
             </div>
           ) : (
             <div className="artisan-card p-8 text-center bg-[#F2F0E9]/30 border-dashed border-2 border-[#EBE7DE]">
