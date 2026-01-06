@@ -20,12 +20,12 @@ export type Database = {
           created_at: string | null
           expected_duration: number
           helper_id: string
+          helper_shared_email: boolean | null
+          helper_shared_phone: boolean | null
           id: string
           offer_id: string | null
           request_id: string
           seeker_id: string
-          seeker_shared_email: boolean | null
-          seeker_shared_phone: boolean | null
           started_at: string | null
           status: Database["public"]["Enums"]["assist_status"] | null
           verification_code: string
@@ -35,12 +35,12 @@ export type Database = {
           created_at?: string | null
           expected_duration: number
           helper_id: string
+          helper_shared_email?: boolean | null
+          helper_shared_phone?: boolean | null
           id?: string
           offer_id?: string | null
           request_id: string
           seeker_id: string
-          seeker_shared_email?: boolean | null
-          seeker_shared_phone?: boolean | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assist_status"] | null
           verification_code: string
@@ -50,12 +50,12 @@ export type Database = {
           created_at?: string | null
           expected_duration?: number
           helper_id?: string
+          helper_shared_email?: boolean | null
+          helper_shared_phone?: boolean | null
           id?: string
           offer_id?: string | null
           request_id?: string
           seeker_id?: string
-          seeker_shared_email?: boolean | null
-          seeker_shared_phone?: boolean | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assist_status"] | null
           verification_code?: string
@@ -361,6 +361,13 @@ export type Database = {
             columns: ["assist_id"]
             isOneToOne: false
             referencedRelation: "assists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issue_reports_assist_id_fkey"
+            columns: ["assist_id"]
+            isOneToOne: false
+            referencedRelation: "view_assist_details"
             referencedColumns: ["id"]
           },
           {
@@ -936,6 +943,81 @@ export type Database = {
           },
         ]
       }
+      view_assist_details: {
+        Row: {
+          created_at: string | null
+          dog_name: string | null
+          dog_photo: string | null
+          dog_size: Database["public"]["Enums"]["dog_size"] | null
+          duration: number | null
+          helper_email: string | null
+          helper_id: string | null
+          helper_name: string | null
+          helper_phone: string | null
+          id: string | null
+          request_id: string | null
+          seeker_email: string | null
+          seeker_full_address: string | null
+          seeker_id: string | null
+          seeker_name: string | null
+          seeker_street_name: string | null
+          special_needs: string | null
+          status: Database["public"]["Enums"]["assist_status"] | null
+          temperament: string[] | null
+          verification_code: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assists_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "profile_details"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "assists_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "profile_with_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assists_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assists_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assists_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: false
+            referencedRelation: "profile_details"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "assists_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: false
+            referencedRelation: "profile_with_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assists_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_neighborhood_offer: {
@@ -946,6 +1028,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      complete_assist: { Args: { p_assist_id: string }; Returns: undefined }
       create_walk_request: {
         Args: {
           p_duration: number
@@ -958,6 +1041,8 @@ export type Database = {
       }
       generate_invite_code: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
+      get_assist_details: { Args: { t_assist_id: string }; Returns: Json }
+      get_my_profile_id: { Args: never; Returns: string }
       get_neighborhood_feed: { Args: never; Returns: Json }
       initialize_neighborhood: {
         Args: { neighborhood_name: string; user_lat: number; user_lng: number }
@@ -968,6 +1053,14 @@ export type Database = {
         Returns: Database["public"]["Enums"]["membership_status"]
       }
       request_vouch_handshake: { Args: never; Returns: string }
+      start_assist: { Args: { p_assist_id: string }; Returns: undefined }
+      update_assist_status: {
+        Args: {
+          t_assist_id: string
+          t_new_status: Database["public"]["Enums"]["assist_status"]
+        }
+        Returns: undefined
+      }
       verify_location_activation: {
         Args: { user_lat: number; user_lng: number }
         Returns: string

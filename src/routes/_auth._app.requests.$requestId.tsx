@@ -186,28 +186,43 @@ function RequestDetailComponent() {
         </header>
 
         <div className="space-y-4">
-          {/* Logistics Card */}
-          <div className="artisan-card p-6 bg-white space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-[#F2F0E9] rounded-xl">
-                <MapPin className="w-4 h-4 text-[#4A5D4E]" />
+        <div className="artisan-card p-6 bg-white shadow-sm space-y-6">
+            
+            {/* 1. Timeframe Section */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <Clock className="w-5 h-5 text-[#4A5D4E]" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-0.5">Location</p>
-                <p className="text-sm font-medium text-[#2D2D2D]">{request.street_name}</p>
-                <p className="text-[9px] text-[#A09B8E] italic">Full address shared once accepted</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Timeframe</p>
+                <p className="text-sm text-[#2D2D2D] font-medium">
+                  {request.timeframe ? format(new Date(request.timeframe), 'p') : 'As Soon As Possible'}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-[#F2F0E9] rounded-xl">
-                <Clock className="w-4 h-4 text-[#4A5D4E]" />
+            {/* 2. Duration Section */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <Dog className="w-5 h-5 text-[#4A5D4E]" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-0.5">Timeframe</p>
-                <p className="text-sm font-medium text-[#2D2D2D]">
-                  {request.timeframe ? format(new Date(request.timeframe), 'p') : 'ASAP'}
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Planned Duration</p>
+                <p className="text-sm text-[#2D2D2D] font-medium">{request.duration} Minutes</p>
+              </div>
+            </div>
+
+            {/* 3. Location Section */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <MapPin className="w-5 h-5 text-[#4A5D4E]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Pickup Address (Verified)</p>
+                <p className="text-sm text-[#2D2D2D] font-medium leading-relaxed">
+                  {request.street_name}
                 </p>
+                <p className="text-[9px] text-[#A09B8E] italic mt-0.5">Full address shared once accepted</p>
               </div>
             </div>
           </div>

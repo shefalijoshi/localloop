@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react'
+import { format } from 'date-fns'
 
 export const Route = createFileRoute('/_auth/_app/assists/$assistId')({
   component: AssistDetailComponent,
@@ -102,61 +103,80 @@ function AssistDetailComponent() {
             <p className="text-[9px] text-[#A09B8E] mt-4 italic">Exchange this code when meeting to verify identity</p>
           </div>
 
-          {/* Logistics Card - Matches Request Details icon circles */}
-          <div className="artisan-card p-6 bg-white space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-[#F2F0E9] rounded-xl">
-                <MapPin className="w-4 h-4 text-[#4A5D4E]" />
+          <div className="artisan-card p-6 bg-white shadow-sm space-y-6">
+            
+            {/* 1. Timeframe Section (Added) */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <Clock className="w-5 h-5 text-[#4A5D4E]" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-0.5">Location</p>
-                <p className="text-sm font-medium text-[#2D2D2D]">
-                   {isHelper ? assist.seeker_full_address : assist.seeker_street_name}
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Timeframe</p>
+                <p className="text-sm text-[#2D2D2D] font-medium">
+                  {assist.timeframe ? format(new Date(assist.timeframe), 'p') : 'As Soon As Possible'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-[#F2F0E9] rounded-xl">
-                <Clock className="w-4 h-4 text-[#4A5D4E]" />
+            {/* 2. Duration Section */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <Dog className="w-5 h-5 text-[#4A5D4E]" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-0.5">Planned Duration</p>
-                <p className="text-sm font-medium text-[#2D2D2D]">{assist.duration} Minutes</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Planned Duration</p>
+                <p className="text-sm text-[#2D2D2D] font-medium">{assist.duration} Minutes</p>
               </div>
             </div>
-          </div>
 
-          {/* Contact Details Card */}
-          <div className="artisan-card p-6 bg-white">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] mb-4">Contact Information</p>
-            <div className="space-y-3">
+            {/* 3. Verified Address Section */}
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 bg-[#F2F0E9]/50 rounded-full flex items-center justify-center shadow-sm border border-[#EBE7DE] shrink-0">
+                <MapPin className="w-5 h-5 text-[#4A5D4E]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Pickup Address (Verified)</p>
+                <p className="text-sm text-[#2D2D2D] font-medium leading-relaxed">
+                  {isHelper ? assist.seeker_full_address : assist.seeker_street_name}
+                </p>
+              </div>
+            </div>
+
+            {/* 4. Contact Information Section */}
+            <div className="pt-6 border-t border-[#F2F0E9] space-y-4">
+              <p className="text-[9px] uppercase tracking-widest font-bold text-[#A09B8E]">Primary Contact</p>
+              
               {isHelper ? (
-                <div className="flex items-center gap-3 text-sm text-[#4A5D4E] bg-[#F9F7F2] p-3 rounded-xl border border-[#EBE7DE]">
-                  <Mail className="w-4 h-4 opacity-60" />
-                  <span className="font-medium">{assist.seeker_email}</span>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 bg-[#F9F7F2] rounded-full flex items-center justify-center border border-[#EBE7DE] shrink-0">
+                    <Mail className="w-4 h-4 text-[#4A5D4E]/60" />
+                  </div>
+                  <p className="text-sm text-[#2D2D2D] font-medium truncate">{assist.seeker_email}</p>
                 </div>
               ) : (
-                <>
-                  {(assist.helper_phone || assist.helper_email) ? (
-                    <div className="space-y-2">
-                      {assist.helper_phone && (
-                        <div className="flex items-center gap-3 text-sm text-[#4A5D4E] bg-[#F9F7F2] p-3 rounded-xl border border-[#EBE7DE]">
-                          <Phone className="w-4 h-4 opacity-60" />
-                          <span className="font-medium">{assist.helper_phone}</span>
-                        </div>
-                      )}
-                      {assist.helper_email && (
-                        <div className="flex items-center gap-3 text-sm text-[#4A5D4E] bg-[#F9F7F2] p-3 rounded-xl border border-[#EBE7DE]">
-                          <Mail className="w-4 h-4 opacity-60" />
-                          <span className="font-medium">{assist.helper_email}</span>
-                        </div>
-                      )}
+                <div className="space-y-3">
+                  {assist.helper_phone && (
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-[#F9F7F2] rounded-full flex items-center justify-center border border-[#EBE7DE] shrink-0">
+                        <Phone className="w-4 h-4 text-[#4A5D4E]/60" />
+                      </div>
+                      <p className="text-sm text-[#2D2D2D] font-medium">{assist.helper_phone}</p>
                     </div>
-                  ) : (
-                    <p className="text-[10px] italic text-[#A09B8E] text-center pt-2">Contact details not shared by helper</p>
                   )}
-                </>
+                  {assist.helper_email && (
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-[#F9F7F2] rounded-full flex items-center justify-center border border-[#EBE7DE] shrink-0">
+                        <Mail className="w-4 h-4 text-[#4A5D4E]/60" />
+                      </div>
+                      <p className="text-sm text-[#2D2D2D] font-medium truncate">{assist.helper_email}</p>
+                    </div>
+                  )}
+                  {!assist.helper_phone && !assist.helper_email && (
+                    <p className="text-[10px] italic text-[#A09B8E] text-center bg-[#F9F7F2] py-3 rounded-xl">
+                      Contact details not shared
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>

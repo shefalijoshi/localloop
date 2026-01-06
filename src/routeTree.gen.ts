@@ -21,6 +21,7 @@ import { Route as AuthAppDashboardRouteImport } from './routes/_auth._app.dashbo
 import { Route as AuthAppCreateRequestRouteImport } from './routes/_auth._app.create-request'
 import { Route as AuthAppRequestsRequestIdRouteImport } from './routes/_auth._app.requests.$requestId'
 import { Route as AuthAppHelpDetailsCreateRouteImport } from './routes/_auth._app.help-details.create'
+import { Route as AuthAppAssistsAssistIdRouteImport } from './routes/_auth._app.assists.$assistId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -82,6 +83,11 @@ const AuthAppHelpDetailsCreateRoute =
     path: '/help-details/create',
     getParentRoute: () => AuthAppRoute,
   } as any)
+const AuthAppAssistsAssistIdRoute = AuthAppAssistsAssistIdRouteImport.update({
+  id: '/assists/$assistId',
+  path: '/assists/$assistId',
+  getParentRoute: () => AuthAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthAppDashboardRoute
   '/invite': typeof AuthAppInviteRoute
   '/vouch': typeof AuthAppVouchRoute
+  '/assists/$assistId': typeof AuthAppAssistsAssistIdRoute
   '/help-details/create': typeof AuthAppHelpDetailsCreateRoute
   '/requests/$requestId': typeof AuthAppRequestsRequestIdRoute
 }
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthAppDashboardRoute
   '/invite': typeof AuthAppInviteRoute
   '/vouch': typeof AuthAppVouchRoute
+  '/assists/$assistId': typeof AuthAppAssistsAssistIdRoute
   '/help-details/create': typeof AuthAppHelpDetailsCreateRoute
   '/requests/$requestId': typeof AuthAppRequestsRequestIdRoute
 }
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_auth/_app/dashboard': typeof AuthAppDashboardRoute
   '/_auth/_app/invite': typeof AuthAppInviteRoute
   '/_auth/_app/vouch': typeof AuthAppVouchRoute
+  '/_auth/_app/assists/$assistId': typeof AuthAppAssistsAssistIdRoute
   '/_auth/_app/help-details/create': typeof AuthAppHelpDetailsCreateRoute
   '/_auth/_app/requests/$requestId': typeof AuthAppRequestsRequestIdRoute
 }
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/invite'
     | '/vouch'
+    | '/assists/$assistId'
     | '/help-details/create'
     | '/requests/$requestId'
   fileRoutesByTo: FileRoutesByTo
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/invite'
     | '/vouch'
+    | '/assists/$assistId'
     | '/help-details/create'
     | '/requests/$requestId'
   id:
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/_auth/_app/dashboard'
     | '/_auth/_app/invite'
     | '/_auth/_app/vouch'
+    | '/_auth/_app/assists/$assistId'
     | '/_auth/_app/help-details/create'
     | '/_auth/_app/requests/$requestId'
   fileRoutesById: FileRoutesById
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppHelpDetailsCreateRouteImport
       parentRoute: typeof AuthAppRoute
     }
+    '/_auth/_app/assists/$assistId': {
+      id: '/_auth/_app/assists/$assistId'
+      path: '/assists/$assistId'
+      fullPath: '/assists/$assistId'
+      preLoaderRoute: typeof AuthAppAssistsAssistIdRouteImport
+      parentRoute: typeof AuthAppRoute
+    }
   }
 }
 
@@ -262,6 +281,7 @@ interface AuthAppRouteChildren {
   AuthAppDashboardRoute: typeof AuthAppDashboardRoute
   AuthAppInviteRoute: typeof AuthAppInviteRoute
   AuthAppVouchRoute: typeof AuthAppVouchRoute
+  AuthAppAssistsAssistIdRoute: typeof AuthAppAssistsAssistIdRoute
   AuthAppHelpDetailsCreateRoute: typeof AuthAppHelpDetailsCreateRoute
   AuthAppRequestsRequestIdRoute: typeof AuthAppRequestsRequestIdRoute
 }
@@ -271,6 +291,7 @@ const AuthAppRouteChildren: AuthAppRouteChildren = {
   AuthAppDashboardRoute: AuthAppDashboardRoute,
   AuthAppInviteRoute: AuthAppInviteRoute,
   AuthAppVouchRoute: AuthAppVouchRoute,
+  AuthAppAssistsAssistIdRoute: AuthAppAssistsAssistIdRoute,
   AuthAppHelpDetailsCreateRoute: AuthAppHelpDetailsCreateRoute,
   AuthAppRequestsRequestIdRoute: AuthAppRequestsRequestIdRoute,
 }
