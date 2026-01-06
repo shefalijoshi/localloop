@@ -36,24 +36,6 @@ function DashboardPage() {
     enabled: !!profile?.neighborhood_id,
   })
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('public:offers')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'offers' },
-        () => {
-          // Invalidate the feed query to trigger a refresh of the counts
-          queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [queryClient])
-
   const { data: feed, isLoading } = useQuery({
     queryKey: ['neighborhood_feed', profile?.id],
     queryFn: async () => {
@@ -64,7 +46,8 @@ function DashboardPage() {
     enabled: !!profile?.id,
   })
 
-  // 4. Real-time Subscription: Refresh on any database change
+  // 4. Real-time Subscription: Refresh on database changes
+
   useEffect(() => {
     const channel = supabase
       .channel('dashboard-feed-changes')
@@ -74,6 +57,19 @@ function DashboardPage() {
         () => {
           queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
         }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'offers' },
+        () => {
+          // Invalidate the feed query to trigger a refresh of the counts
+          queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
+        }
+      )
+      .on( // Merged assist listener
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'assists' },
+        () => queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
       )
       .subscribe()
 
@@ -91,6 +87,8 @@ function DashboardPage() {
   const neighborRequests = feed?.neighborhood_requests?.filter((r: any) => 
     isAfter(new Date(r.expires_at), now)
   ) || []
+
+  const activeAssists = feed?.active_assists || []
 
   return (
     <div className="min-h-screen bg-[#F9F7F2] pb-20">
@@ -140,6 +138,62 @@ function DashboardPage() {
           </Link>
         </div>
 
+        {/* Section: Active assists */}
+        {activeAssists.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em] mb-6">Confirmed Assist Details</h2>
+            <div className="space-y-4">
+              {activeAssists.map((assist: any) => {
+                const isHelper = assist.helper_id === profile?.id;
+                return (
+                  <div key={assist.id} className="artisan-card p-6 bg-white border-t-4 border-[#BC6C4D]">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <span className={`px-2 py-0.5 ${assist.status === 'in_progress' ? 'bg-orange-100 text-orange-700' : 'bg-[#BC6C4D]/10 text-[#BC6C4D]'} text-[9px] font-bold rounded uppercase tracking-tighter`}>
+                          {assist.status.replace('_', ' ')}
+                        </span>
+                        <h3 className="text-xl font-serif text-[#2D2D2D] mt-1">
+                          {isHelper ? `Helping ${assist.seeker_name}` : `${assist.helper_name} is helping you`}
+                        </h3>
+                        <p className="text-[#6B6658] text-[11px] mt-1">
+                          Walk for <span className="font-bold">{assist.dog_name}</span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[9px] font-bold text-[#A09B8E] uppercase block mb-1">Verify Code</span>
+                        <span className="text-2xl font-serif tracking-widest text-[#2D2D2D]">{assist.verification_code}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#F2F0E9]">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] text-[#6B6658]">
+                          <MapPin className="w-3.5 h-3.5 opacity-40" />
+                          <span>{isHelper ? assist.seeker_address : 'Your Home'}</span>
+                        </div>
+                      </div>
+                      {isHelper ? (
+                      <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-[#A09B8E] uppercase block">Contact Neighbor</span>
+                          <div className="text-[11px] text-[#2D2D2D]">
+                            <div>{assist.seeker_email}</div>
+                          </div>
+                      </div>) : (
+                      <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-[#A09B8E] uppercase block">Contact Neighbor</span>
+                          <div className="text-[11px] text-[#2D2D2D]">
+                            {assist.helper_shared_phone && <div>{assist.helper_phone}</div>}
+                            {assist.helper_shared_email && <div>{assist.helper_email}</div>}
+                            {!assist.helper_shared_phone && !assist.helper_shared_email && <span className="italic opacity-50">No contact shared</span>}
+                          </div>
+                      </div>)}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
         {/* Section: Your Requests */}
         {myRequests.length > 0 && (
           <section className="mb-12">
