@@ -57,7 +57,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     return { session, user, profile, membershipStatus }
   },
   component: () => (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Outlet />
     </div>
   ),

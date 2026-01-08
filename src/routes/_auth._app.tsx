@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect, useRouteContext, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { UserPlus } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app')({
   beforeLoad: ({ context }) => {
@@ -29,10 +30,11 @@ function AppLayout() {
   })
 
   return (
-    <div className="min-h-screen bg-[#F9F7F2]">
-      <main className="max-w-4xl mx-auto px-6 pt-6">
+    /*bg-[#F9F7F2] */
+    <div className="min-h-screen">
+      <main className="flex-1 w-full mx-auto px-6 pt-6">
         {/* Global Identity Bar: Branding Left, Profile Right */}
-        <header className="mb-4 flex justify-between items-center">
+        <header className="mb-4 flex justify-between items-center border-b border-brand-border pb-8">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-serif text-[#2D2D2D] tracking-tight">
               {neighborhood?.name || 'Local Neighborhood'}
@@ -53,7 +55,20 @@ function AppLayout() {
           </Link>
         </header>
 
-        <Outlet /> 
+        <Outlet />
+        
+        <footer className="mt-12 text-center pb-8">
+        <Link 
+          to="/invite" 
+          className="link-standard"
+        >
+          <UserPlus className="w-4 h-4" />
+          <span className="text-label">Invite to Registry</span>
+        </Link>
+        <p className="text-brand-muted mt-4">
+          Secure Network • Verified Residents Only
+        </p>
+      </footer>
       </main>
     </div>
   )

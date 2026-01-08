@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { Dog, Clock, MapPin, ChevronRight, PlusCircle, ShieldCheck, UserPlus, Hand } from 'lucide-react'
+import { Dog, Clock, MapPin, ChevronRight, PlusCircle, ShieldCheck, Hand } from 'lucide-react'
 import { format, isAfter } from 'date-fns'
 
 export const Route = createFileRoute('/_auth/_app/dashboard')({
@@ -32,8 +32,6 @@ function DashboardPage() {
     enabled: !!profile?.id,
   })
 
-  // 4. Real-time Subscription: Refresh on database changes
-
   useEffect(() => {
     const channel = supabase
       .channel('dashboard-feed-changes')
@@ -48,11 +46,10 @@ function DashboardPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'offers' },
         () => {
-          // Invalidate the feed query to trigger a refresh of the counts
           queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
         }
       )
-      .on( // Merged assist listener
+      .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'assists' },
         () => queryClient.invalidateQueries({ queryKey: ['neighborhood_feed'] })
@@ -64,8 +61,6 @@ function DashboardPage() {
     }
   }, [queryClient])
 
-  // 5. Client-side Passive Expiry Filter
-  // This ensures cards vanish the moment 'now' passes 'expires_at'
   const myRequests = feed?.my_requests?.filter((r: any) => 
     isAfter(new Date(r.expires_at), now)
   ) || []
@@ -77,32 +72,32 @@ function DashboardPage() {
   const activeAssists = feed?.active_assists || []
 
   return (
-    <div className="pb-12">
-      {/* 3. Action Pills (Right Aligned Below) */}
-      <div className="flex justify-end gap-3 mb-10">
+    <div className="pb-2 artisan-page-focus">
+      {/* Action Pills */}
+      <div className="artisan-container-large flex justify-end gap-3 mb-10">
         <Link
           to="/create-request"
-          className="h-10 px-4 bg-[#4A5D4E] text-white rounded-full flex items-center gap-2 shadow-sm hover:bg-[#3d4d40] transition-colors shrink-0"
+          className="pill-primary"
           aria-label="Request a walk"
         >
           <PlusCircle className="w-4 h-4" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Request</span>
+          <span className="text-label text-white">Request</span>
         </Link>
         
         <Link
           to="/vouch"
-          className="h-10 px-4 bg-[#F2F0E9] text-[#4A5D4E] rounded-full flex items-center gap-2 border border-[#EBE7DE] shadow-sm hover:bg-[#EBE7DE] transition-colors shrink-0"
+          className="pill-secondary"
           aria-label="Vouch for a neighbor"
         >
           <ShieldCheck className="w-4 h-4" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Vouch</span>
+          <span className="text-label text-brand-green">Vouch</span>
         </Link>
       </div>
 
       {/* Section: Active assists */}
       {activeAssists.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em] mb-6">Confirmed Assist Details</h2>
+        <section className="mb-12 artisan-container-large">
+          <h2 className="text-label mb-6">Confirmed Assist Details</h2>
           <div className="space-y-4">
           {activeAssists.map((assist: any) => {
             const isHelper = assist.helper_id === profile?.id;
@@ -111,31 +106,31 @@ function DashboardPage() {
                 key={assist.id} 
                 to="/assists/$assistId" 
                 params={{ assistId: assist.id }}
-                className="block artisan-card p-6 bg-white border-l-4 border-[#BC6C4D] shadow-sm hover:shadow-md transition-all group"
+                className="block artisan-card p-6 border-l-4 border-brand-terracotta hover:shadow-md transition-all group"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-tighter ${
-                        assist.status === 'in_progress' ? 'bg-orange-100 text-orange-700' : 'bg-[#BC6C4D]/10 text-[#BC6C4D]'
+                      <span className={`badge-pill ${
+                        assist.status === 'in_progress' ? 'bg-orange-100 text-orange-700' : ''
                       }`}>
                         {assist.status.replace('_', ' ')}
                       </span>
                     </div>
-                    <h3 className="text-lg font-serif text-[#2D2D2D]">
+                    <h3 className="text-lg">
                       {isHelper ? `Walk for ${assist.seeker_name}` : `Walk by ${assist.helper_name}`}
                     </h3>
-                    <div className="flex items-center gap-1 text-[10px] text-[#A09B8E] uppercase tracking-wide font-medium">
-                      <Dog className="w-3 h-3 opacity-40" />
+                    <div className="flex items-center gap-1 text-label font-medium">
+                      <Dog className="w-3 h-3 opacity-80" />
                       <span>{assist.dog_name}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <span className="text-[9px] font-bold text-[#A09B8E] uppercase block">Code</span>
-                      <span className="text-lg font-serif text-[#2D2D2D] tracking-widest">{assist.verification_code}</span>
+                      <span className="text-label block">Code</span>
+                      <span className="text-passcode text-lg ml-0">{assist.verification_code}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-[#EBE7DE] group-hover:text-[#BC6C4D] transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-brand-border group-hover:text-brand-terracotta transition-colors" />
                   </div>
                 </div>
               </Link>
@@ -144,41 +139,42 @@ function DashboardPage() {
           </div>
         </section>
       )}
+
       {/* Section: Your Requests */}
       {myRequests.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em] mb-6">Your Active Requests</h2>
+        <section className="artisan-container-large mb-12">
+          <h2 className="text-label mb-6">Your Active Requests</h2>
           <div className="space-y-4">
             {myRequests.map((req: any) => (
               <Link 
                 key={req.id} 
                 to="/requests/$requestId" 
                 params={{ requestId: req.id }}
-                className="block artisan-card p-4 bg-white border-l-4 border-[#4A5D4E] shadow-sm hover:shadow-md transition-all"
+                className="block artisan-card p-4 border-l-4 border-brand-green hover:shadow-md transition-all"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-[#F2F0E9] rounded-full flex items-center justify-center text-xl overflow-hidden border border-[#EBE7DE]">
+                    <div className="icon-box text-xl overflow-hidden">
                       {req.dog_photo ? (
                         <img src={req.dog_photo} alt="" className="h-full w-full object-cover" />
                       ) : '🐕'}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-serif text-[#2D2D2D]">{req.dog_name || 'Dog Walk'}</h4>
+                        <h4>{req.dog_name || 'Dog Walk'}</h4>
                         {req.offer_count > 0 && (
-                          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#BC6C4D] text-white rounded-full">
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-brand-terracotta text-white rounded-full">
                             <Hand className="w-2.5 h-2.5" />
-                            <span className="text-[9px] font-bold">{req.offer_count}</span>
+                            <span className="text-[9px]">{req.offer_count}</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-[10px] text-[#A09B8E] uppercase tracking-wide">
+                      <p className=".artisan-meta-tiny">
                         Expires {format(new Date(req.expires_at), 'p')}
                       </p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#EBE7DE]" />
+                  <ChevronRight className="w-4 h-4 text-brand-border" />
                 </div>
               </Link>
             ))}
@@ -187,14 +183,13 @@ function DashboardPage() {
       )}
       
       {/* Section: Neighborhood Activity */}
-      <section>
+      <section className='artisan-container-large'>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[10px] font-bold text-[#A09B8E] uppercase tracking-[0.2em]">Neighborhood Requests</h2>
-          <div className="h-px flex-1 bg-[#EBE7DE] ml-4 opacity-40"></div>
+          <h2 className="text-label">Neighborhood Requests</h2>
         </div>
         
         {isLoading ? (
-          <div className="py-12 text-center text-[#6B6658] italic text-xs font-serif">Gathering updates...</div>
+          <div className="py-12 text-center text-brand-text italic text-xs font-serif">Gathering updates...</div>
         ) : neighborRequests.length > 0 ? (
           <div className="space-y-4">
             {neighborRequests.map((req: any) => (
@@ -202,35 +197,35 @@ function DashboardPage() {
                 key={req.id} 
                 to="/requests/$requestId" 
                 params={{ requestId: req.id }}
-                className="block artisan-card p-6 bg-white hover:shadow-md transition-shadow"
+                className="block artisan-card p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col gap-4">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 bg-[#4A5D4E]/10 text-[#4A5D4E] text-[9px] font-bold rounded uppercase tracking-tighter">Dog Walk</span>
-                        <span className="text-[#A09B8E] text-[10px]">• {req.duration}m</span>
+                        <span className="badge-pill bg-brand-green/10 text-brand-green">Dog Walk</span>
+                        <span className="text-brand-text">• {req.duration}m</span>
                       </div>
-                      <h3 className="text-xl font-serif text-[#2D2D2D]">
+                      <h3 className="text-xl">
                         {req.dog_name || 'Walk Needed'}
                       </h3>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-center gap-1 justify-end text-[10px] font-bold text-[#A09B8E] uppercase tracking-tighter">
+                      <div className="flex items-center gap-1 justify-end text-label">
                         <Clock className="w-3 h-3" />
                         <span>Respond by {format(new Date(req.expires_at), 'p')}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-[#6B6658] text-[11px] pt-4 border-t border-[#F2F0E9]">
+                  <div className="detail-row pt-4 border-t border-brand-stone">
                     <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 opacity-40" />
-                      <span className="font-medium uppercase tracking-wider">{req.street_name}</span>
+                      <MapPin className="w-3 h-3 opacity-80 text-brand-text" />
+                      <span className="text-label tracking-wider">{req.street_name}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Dog className="w-3 h-3 opacity-40" />
-                      <span className="capitalize">{req.dog_size} Dog</span>
+                      <Dog className="w-3 h-3 opacity-80 text-brand-text" />
+                      <span className="text-label lowercase font-medium">{req.dog_size} Dog</span>
                     </div>
                   </div>
                 </div>
@@ -238,23 +233,13 @@ function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-[#F2F0E9]/40 border-2 border-dashed border-[#EBE7DE] rounded-[2rem] py-16 text-center">
-              <p className="text-[#A09B8E] text-[9px] font-bold uppercase tracking-[0.2em] mb-1">
-                All quiet on the street
-              </p>
-              <p className="text-[#6B6658] text-[11px] italic opacity-60 px-8">
+          <div className="alert-success border-2 border-dashed py-16">
+              <p className="alert-body italic opacity-80 px-8">
                 "When neighbors need a hand with their dogs, their requests will appear here."
               </p>
           </div>
         )}
       </section>
-
-      <footer className="mt-16 pt-8 border-t border-[#EBE7DE] text-center">
-        <Link to="/invite" className="inline-flex items-center gap-2 text-[#A09B8E] hover:text-[#4A5D4E] transition-colors">
-          <UserPlus className="w-4 h-4" />
-          <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Invite to Registry</span>
-        </Link>
-      </footer>
     </div>
   )
 }

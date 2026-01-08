@@ -52,27 +52,29 @@ function VouchEntryPage() {
   // SUCCESS VIEW
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-3xl font-serif text-[#2D2D2D] mb-4">Neighborhood Expanded</h1>
-        <p className="text-[#6B6658] text-sm italic mb-10">"Their residency is now verified by your word."</p>
-        <button onClick={() => navigate({ to: '/' })} className="btn-primary px-8">Finish</button>
+      <div className="artisan-page-focus">
+        <div className="artisan-container-sm max-w-sm">
+          <h1 className="artisan-header-title">Neighborhood Expanded</h1>
+          <p className="artisan-header-description">"Their residency is now verified by your word."</p>
+          <button onClick={() => navigate({ to: '/' })} className="btn-primary px-8">Finish</button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F2] flex flex-col items-center">
-      <div className="w-full max-w-sm">
-        <header className="text-center mb-10">
-          <div className="inline-block px-3 py-1 bg-[#EBE7DE] rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#6B6658] mb-4">
+    <div className="artisan-page-focus">
+      <div className="artisan-container-sm max-w-sm">
+        <header className="artisan-header">
+          <div className="badge-pill mb-4">
             Security: Handshake
           </div>
-          <h2 className="text-3xl font-serif text-[#2D2D2D]">Vouch for Neighbor</h2>
+          <h1 className="artisan-header-title">Vouch for Neighbor</h1>
         </header>
   
         {/* The Unified Artisan Card */}
-        <div className="artisan-card p-2 bg-white border-t-4 border-[#4A5D4E]">
-          <div className="bg-[#F2F0E9]/50 rounded-[1.8rem] py-10 px-6">
+        <div className="artisan-card border-t-4 border-brand-green">
+          <div className="artisan-card-inner text-center">
             <form onSubmit={handleSubmit} className="space-y-10">
               <PasscodeInput 
                 value={code} 
@@ -83,19 +85,19 @@ function VouchEntryPage() {
               <button
                 type="submit"
                 disabled={code.length < 6 || vouchMutation.isPending}
-                className="btn-primary w-full py-4 text-xs tracking-[0.1em] shadow-xl shadow-[#4A5D4E]/10"
+                className="btn-primary mt-8"
               >
-                {vouchMutation.isPending ? 'VERIFYING...' : 'AUTHORIZE ACCESS'}
+                {vouchMutation.isPending ? 'Verifying...' : 'Authorize Access'}
               </button>
             </form>
           </div>
         </div>
   
-        <button
-          onClick={() => navigate({ to: '/dashboard' })}
-          className="mt-8 w-full text-[10px] uppercase tracking-widest font-bold text-[#A09B8E] hover:text-[#6B6658]"
-        >
-          Cancel and Return
+        <button 
+            onClick={() => navigate({ to: '/dashboard' })} 
+            className="nav-link-back w-full justify-center mt-6"
+          >
+            Cancel and Return
         </button>
       </div>
     </div>

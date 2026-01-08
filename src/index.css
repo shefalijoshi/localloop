@@ -11,13 +11,14 @@
   --color-brand-green: #4A5D4E;
   --color-brand-green-hover: #3d4d40;
   --color-brand-terracotta: #BC6C4D; /* Used for "Complete Walk" and Errors */
+  --color-brand-terracotta-hover: #A55E42;
   
   /* --- Backgrounds & Surfaces --- */
   --color-brand-beige: #F9F7F2;  /* Main Page Background */
   --color-brand-stone: #F2F0E9;  /* Pill/Card-inner backgrounds */
   
   /* --- Borders & Outlines --- */
-  --color-brand-border: #EBE7DE;
+  --color-brand-border: #C8C4BD;
   
   /* --- Typography --- */
   --color-brand-dark: #2D2D2D;   /* Main Headings */
@@ -31,7 +32,7 @@
 @layer base {
   body {
     /* Nestig-style "Linen" background */
-    @apply bg-[#F9F7F2] text-[#2D2D2D] antialiased;
+    @apply bg-brand-beige text-brand-dark antialiased;
     font-family: 'Lora', serif;
   }
 
@@ -55,7 +56,7 @@
   .btn-secondary {
     @apply w-full py-4 bg-brand-terracotta text-white rounded-2xl capitalize tracking-widest 
            shadow-xl shadow-brand-terracotta/10 
-           hover:bg-[#a55e42] active:scale-[0.98] 
+           hover:bg-brand-terracotta-hover active:scale-[0.98] 
            transition-all disabled:opacity-50 
            flex items-center justify-center gap-2;
   }
@@ -65,6 +66,10 @@
     @apply w-full py-4 rounded-xl text-xs capitalize tracking-widest 
            border transition-all duration-300 active:scale-[0.98]
            flex items-center justify-center gap-2;
+  }
+
+  .btn-outline-active {
+    @apply bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/10;
   }
 
   /* The primary action pill (Request button on Dashboard) */
@@ -78,7 +83,7 @@
   }
 
   .artisan-page-focus {
-    @apply min-h-[80vh] flex flex-col items-center bg-brand-beige px-6;
+    @apply min-h-[80vh] flex flex-col items-center;
   }
 
   /* Standardizes the responsive width container for focused content */
@@ -86,11 +91,23 @@
     @apply w-full max-w-sm text-center;
   }
 
+  .artisan-container-large {
+    @apply w-full max-w-4xl mx-auto text-left;
+  }
+
   .artisan-input {
     @apply w-full bg-white border-2 border-brand-border rounded-2xl 
            px-6 py-4 outline-none transition-all 
-           text-brand-dark placeholder:text-brand-muted/60
+           text-brand-dark placeholder:text-brand-text/60
            focus:border-brand-green focus:shadow-sm focus:shadow-brand-green/5;
+  }
+
+  .input-adornment-wrapper {
+    @apply relative flex items-center;
+  }
+
+  .input-adornment-right {
+    @apply absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center;
   }
 
   /* Standardizes the page intro section */
@@ -150,9 +167,13 @@
     @apply font-serif text-brand-dark text-sm truncate block;
   }
 
+  .card-instruction-text {
+    @apply text-sm text-brand-text leading-relaxed px-4;
+  }
+
   /* For the tiny metadata like Dog Size or Status */
   .artisan-meta-tiny {
-    @apply text-[9px] text-brand-muted tracking-tighter block;
+    @apply text-[12px] text-brand-text tracking-tighter block;
   }
 
   /* Standardizes the container for invite/verification codes */
@@ -166,14 +187,22 @@
     @apply text-4xl font-mono font-bold tracking-[0.3em] text-brand-dark ml-[0.3em];
   }
 
+  .text-passcode-expired {
+    @apply opacity-60 grayscale;
+  }
+
   /* Metadata Labels (Security Status, Dog Size, Timestamps) */
   .text-label {
-    @apply text-[16px] font-bold capitalize tracking-[0.1em] text-brand-muted;
+    @apply text-[16px] font-bold capitalize tracking-[0.1em] text-brand-text;
+  }
+
+  .text-verified {
+    @apply mt-3 text-[14px] text-brand-muted font-bold flex items-center gap-1.5 ml-1;
   }
 
   /* Standardizes "Back" buttons - We repeat the label logic instead of @applying it */
   .nav-link-back {
-    @apply flex items-center gap-2 text-brand-muted hover:text-brand-green 
+    @apply flex items-center gap-2 text-brand-text hover:text-brand-green 
            transition-colors mb-6 text-[14px] capitalize tracking-[0.1em];
   }
 
@@ -200,15 +229,28 @@
   }
 
   .alert-success {
-    @apply mt-6 p-4 rounded-xl bg-brand-green/5 border border-brand-green/10 text-center;
+    @apply p-6 rounded-2xl bg-brand-green/5 border border-brand-green/10 text-center;
   }
 
   /* Standardized Typography for Alerts */
   .alert-title {
-    @apply text-[16px] tracking-tighter block mb-1 text-brand-muted;
+    @apply text-[16px] tracking-tighter block mb-1 text-brand-text;
   }
 
   .alert-body {
     @apply text-[16px] text-brand-text block;
+  }
+
+  .link-standard {
+    @apply text-brand-text hover:text-brand-green disabled:text-brand-muted 
+    transition-colors duration-300 flex items-center justify-center gap-2;
+  }
+
+  .loading-focus-state {
+    @apply text-center py-20 animate-in;
+  }
+
+  .spinner-brand {
+    @apply h-12 w-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin mx-auto mb-6;
   }
 }
