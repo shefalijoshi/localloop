@@ -150,81 +150,91 @@ function CreateRequestPage() {
                 onSelect={(id) => setPetId(id)} 
               />
             )}
+            <div className="artisan-card">
+              <div className="artisan-card-inner !p-2 space-y-6 text-left">
+                {/* Form Fork: TimingModule Logic */}
+                {selectedAction.type === 'service' && (
+                  <div className="detail-row">
+                    {/* <div className="icon-box">
+                      <Clock className="w-4 h-4 text-brand-green" />
+                    </div> */}
+                    <div className="flex-1">
+                      <label className="text-label">When?</label>
+                      <div className="grid grid-cols-2 gap-2 mb-4 mt-2">
+                        <button 
+                          onClick={() => setTimeframe('now')} 
+                          className={`py-3 rounded-xl border-2 transition-all ${
+                            timeframe === 'now' ? 'border-brand-green bg-brand-green text-white' : 'border-brand-stone text-brand-text'
+                          }`}
+                        >
+                          As Soon As Possible
+                        </button>
+                        <button 
+                          onClick={() => setTimeframe('scheduled')} 
+                          className={`py-3 rounded-xl border-2 transition-all ${
+                            timeframe === 'scheduled' ? 'border-brand-green bg-brand-green text-white' : 'border-brand-stone text-brand-text'
+                          }`}
+                        >
+                          Schedule Later
+                        </button>
+                      </div>
+                      {timeframe === 'scheduled' && (
+                        <input 
+                        type="datetime-local" 
+                        className="artisan-input text-sm mt-2"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                      />)}
+                    </div>
+                  </div>)}
+                {selectedAction.type === 'service' && (
+                  <div className='detail-row'>
+                    <ServiceDurationField value={duration} onChange={setDuration} />
+                  </div>
+                )} 
+                {selectedAction.type !== 'service' && (
+                  /* Item Fork: Derives duration from Date Range */
+                  <div className="detail-row">
+                    <ItemDurationField onDurationChange={(mins) => {
+                      setDuration(mins);
+                    }} />
+                  </div>
+                )}
 
-            {/* Form Fork: TimingModule Logic */}
-            <div className="artisan-card p-4 bg-white space-y-2">
-              {selectedAction.type === 'service' ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-brand-green" />
-                    <label className="text-label">When?</label>
+                <div className="detail-row">
+                  <div flex-1>
+                    <label className="text-label italic">Extra Details</label>
+                    <textarea 
+                      maxLength={280}
+                      className="mt-2 artisan-input min-h-[100px] resize-none"
+                      placeholder="e.g. 'I can drop it off' or 'The gate code is 1234'..."
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <button 
-                      onClick={() => setTimeframe('now')} 
-                      className={`py-3 rounded-xl border-2 transition-all ${
-                        timeframe === 'now' ? 'border-brand-green bg-brand-green text-white' : 'border-brand-stone text-brand-text'
-                      }`}
-                    >
-                      As Soon As Possible
-                    </button>
-                    <button 
-                      onClick={() => setTimeframe('scheduled')} 
-                      className={`py-3 rounded-xl border-2 transition-all ${
-                        timeframe === 'scheduled' ? 'border-brand-green bg-brand-green text-white' : 'border-brand-stone text-brand-text'
-                      }`}
-                    >
-                      Schedule Later
-                    </button>
-                  </div>
-                  {timeframe === 'scheduled' && (
-                    <input 
-                    type="datetime-local" 
-                    className="artisan-input text-sm mt-2"
-                    value={scheduledTime}
-                    onChange={(e) => setScheduledTime(e.target.value)}
-                  />)}
-                  <ServiceDurationField value={duration} onChange={setDuration} />
                 </div>
-              ) : (
-                /* Item Fork: Derives duration from Date Range */
-                <ItemDurationField onDurationChange={(mins) => {
-                  setDuration(mins);
-                }} />
-              )}
-
-              <div className="space-y-2 mt-4">
-                <label className="text-label italic">Extra Details</label>
-                <textarea 
-                  maxLength={280}
-                  className="artisan-input min-h-[100px] resize-none"
-                  placeholder="e.g. 'I can drop it off' or 'The gate code is 1234'..."
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
-              </div>
-
+              </div>  
               <div className="pt-4 text-center">
-                <button 
-                  onClick={() => createRequest.mutate()}
-                  disabled={createRequest.isPending || (selectedCategory?.requiresProfile && !petId)}
-                  className="btn-primary w-full flex justify-center items-center gap-2"
-                >
-                  {createRequest.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                  Post to Neighborhood
-                </button>
-                <button 
-                  onClick={() => navigate({ to: '/dashboard' })} 
-                  className="nav-link-back w-full justify-center mt-6"
-                >
-                  Cancel Request
-                </button>
-              </div>
-            </div>
+                  <button 
+                    onClick={() => createRequest.mutate()}
+                    disabled={createRequest.isPending || (selectedCategory?.requiresProfile && !petId)}
+                    className="btn-primary w-full flex justify-center items-center gap-2"
+                  >
+                    {createRequest.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    Post to Neighborhood
+                  </button>
+                  <button 
+                    onClick={() => navigate({ to: '/dashboard' })} 
+                    className="nav-link-back w-full justify-center mt-6"
+                  >
+                    Cancel Request
+                  </button>
+                </div>
+            </div> 
           </div>
         )}
       </div>
