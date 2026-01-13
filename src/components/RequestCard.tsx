@@ -14,6 +14,7 @@ export function RequestCard({ request, isMine, hasMyOffer }: RequestCardProps) {
   const category = CATEGORY_INTENT.find((c) => c.id === request.category_id);
   const Icon = category?.icon || Clock;
   const brandColor = category?.color || 'bg-brand-green';
+  const borderBrandColor = brandColor.replace('bg-', 'border-');
 
   const action = category?.actions.find(a => a.id === request.action_id);
   const actionLabel = action?.label || '';
@@ -35,7 +36,7 @@ export function RequestCard({ request, isMine, hasMyOffer }: RequestCardProps) {
     <Link 
       to="/requests/$requestId" 
       params={{ requestId: request.id }}
-      className="block artisan-card px-4 pt-4 pb-2 hover:shadow-md transition-shadow group"
+      className={`block artisan-card ${borderBrandColor} px-4 pt-4 pb-2 hover:shadow-md transition-shadow group`}
     >
       <div className="flex flex-col gap-">
         {/* Header Section */}

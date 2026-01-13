@@ -82,7 +82,7 @@ function DashboardPage() {
       {/* 1. Section: Active Assists */}
       {activeAssists.length > 0 && (
         <section className="artisan-container-large mb-10">
-          <h2 className="text-label mb-4">Confirmed Assists</h2>
+          <h2 className="text-label mb-4">Help you've arranged</h2>
           <div className="space-y-4">
             {activeAssists.map((assist: any) => (
               <AssistCard 
@@ -98,7 +98,7 @@ function DashboardPage() {
       {/* 2. Section: Your Requests */}
       {myRequests.length > 0 && (
         <section className="artisan-container-large mb-10">
-          <h2 className="text-label mb-4">Your Active Requests</h2>
+          <h2 className="text-label mb-4">What you need help with</h2>
           <div className="space-y-4">
             {myRequests.map((req: any) => (
               <RequestCard key={req.id} request={req} isMine={true} hasMyOffer={req.helper_id === profile?.id} />
@@ -109,7 +109,7 @@ function DashboardPage() {
       
       {/* 3. Section: Neighborhood Activity */}
       <section className='artisan-container-large'>
-        <h2 className="text-label mb-4">Neighborhood Requests</h2>
+        <h2 className="text-label mb-4">Neighbors looking for help</h2>
         
         {isLoading ? (
           <div className="py-12 text-center text-brand-text italic text-xs font-serif">

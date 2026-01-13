@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { format, addMinutes, intervalToDuration, formatDuration } from 'date-fns';
-import { Clock, Calendar, ShieldAlert, ChevronRight, MapPin } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, MapPin, AlarmClock, ClockFading, Check, Clipboard, Lock } from 'lucide-react';
 import { CATEGORY_INTENT } from '../lib/categoryIntent';
 
 interface AssistCardProps {
@@ -12,10 +12,20 @@ export function AssistCard({ assist, currentProfileId }: AssistCardProps) {
   const category = CATEGORY_INTENT.find(c => c.id === assist.category_id);
   const Icon = category?.icon || Clock;
   const brandColor = category?.color || 'bg-brand-green';
+  const borderBrandColor = brandColor.replace('bg-', 'border-');
 
   const {name} = assist.snapshot_data;
 
   const isHelper = assist.helper_id === currentProfileId;
+  let AssistProgressIcon = Clipboard;
+  if (assist.status === 'confirmed') {
+    AssistProgressIcon = AlarmClock;
+  } else if (assist.status === 'in_progress') {
+    AssistProgressIcon = ClockFading;
+  } else if (assist.status === 'completed') {
+    AssistProgressIcon = Check;
+  }
+  const assistLabel = isHelper ? assist.seeker_name : assist.helper_name;
 
   const action = category?.actions.find(a => a.id === assist.action_id);
   const actionLabel = action?.label || '';
@@ -37,7 +47,7 @@ export function AssistCard({ assist, currentProfileId }: AssistCardProps) {
     <Link
       to="/assists/$assistId"
       params={{ assistId: assist.id }}
-      className="block artisan-card px-4 pt-4 pb-2 hover:shadow-md transition-shadow group"
+      className={`block artisan-card ${borderBrandColor} px-4 pt-4 pb-2 hover:shadow-md transition-shadow group`}
     >
       <div className="flex flex-col gap-2">
         {/* Header: Identity & Status */}
@@ -54,13 +64,16 @@ export function AssistCard({ assist, currentProfileId }: AssistCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5 justify-between">
-          <span className="badge-pill !bg-brand-terracotta !text-white !text-[9px] !py-0.5 line-clamp-2">
-            {assist.status.replace('_', ' ')} with {isHelper ? assist.seeker_name : assist.helper_name}
-          </span>
+          <div className="badge-pill-light flex items-center gap-1 justify-end text-brand-dark">
+            <AssistProgressIcon className="w-4 h-4" />
+            <span className="line-clamp-2">
+              {assistLabel}
+            </span>
+          </div>
           <div className="flex items-center gap-1 justify-end text-brand-dark">
-            <ShieldAlert className="w-3 h-3 text-brand-terracotta" /> 
+            <Lock className="w-3 h-3 text-brand-terracotta" /> 
             <span className="text-xs font-mono tracking-tighter">
-              Code {assist.verification_code}
+              {assist.verification_code}
             </span>
           </div>
         </div>

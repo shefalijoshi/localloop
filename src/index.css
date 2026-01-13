@@ -152,9 +152,11 @@
   }
 
   .artisan-card {
-    @apply p-2 bg-white rounded-[2rem] border border-brand-border
+    @apply p-2 bg-white rounded-r-[2rem] rounded-l-[0.5rem] border-l-3 border-brand-terracotta
            shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
            transition-all duration-500 ease-out;
+           /* before:absolute before:-left-1 before:h-full before:w-2 before:bg-brand-terracotta; */
+
   }
 
   /* The inner recessed area for cards */
@@ -221,6 +223,11 @@
   .badge-pill {
     @apply inline-block px-3 py-1 bg-brand-stone rounded-full 
            text-[14px] capitalize tracking-[0.1em] font-bold text-brand-text;
+  }
+
+  /* Security/Status Badges 2 */
+  .badge-pill-light {
+    @apply inline-block px-3 py-1 border-l-[2px] border-brand-terracotta text-[14px] tracking-[0.1em] text-brand-terracotta;
   }
 
   /* Standardized Alert Containers */
