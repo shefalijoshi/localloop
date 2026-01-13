@@ -23,6 +23,9 @@ export function RequestCard({ request, isMine, hasMyOffer }: RequestCardProps) {
   if (actionLabel) {
     heading = heading ? `${heading} - ${actionLabel}` : `${actionLabel}`;
   }
+  if (!heading) {
+    heading = request.request_type === 'item' ? 'Item Requested' : 'Service Requested';
+  }
     
   // 3. Timing Logic
   const startTime = new Date(request.scheduled_time);

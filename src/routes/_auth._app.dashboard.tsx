@@ -101,7 +101,7 @@ function DashboardPage() {
           <h2 className="text-label mb-4">Your Active Requests</h2>
           <div className="space-y-4">
             {myRequests.map((req: any) => (
-              <RequestCard key={req.id} request={req} isMine={true} />
+              <RequestCard key={req.id} request={req} isMine={true} hasMyOffer={req.helper_id === profile?.id} />
             ))}
           </div>
         </section>
