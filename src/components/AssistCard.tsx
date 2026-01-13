@@ -25,6 +25,9 @@ export function AssistCard({ assist, currentProfileId }: AssistCardProps) {
   if (actionLabel) {
     heading = heading ? `${heading} - ${actionLabel}` : `${actionLabel}`;
   }
+  if (!heading) {
+    heading = assist.request_type === 'item' ? 'Item Requested' : 'Service Requested';
+  }
 
   // Timing Logic
   const startTime = new Date(assist.scheduled_time);

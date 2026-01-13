@@ -76,6 +76,9 @@ function AssistDetailComponent() {
   if (actionLabel) {
     heading = heading ? `${heading} - ${actionLabel}` : `${actionLabel}`;
   }
+  if (!heading) {
+    heading = assist.request_type === 'item' ? 'Item Requested' : 'Service Requested';
+  }
 
   const startTime = new Date(assist.scheduled_time);
   const endTime = addMinutes(startTime, assist.expected_duration || 0);

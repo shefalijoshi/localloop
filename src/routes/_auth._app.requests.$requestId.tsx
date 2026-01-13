@@ -172,6 +172,9 @@ function RequestDetailComponent() {
   if (actionLabel) {
     heading = heading ? `${heading} - ${actionLabel}` : `${actionLabel}`;
   }
+  if (!heading) {
+    heading = request.request_type === 'item' ? 'Item Requested' : 'Service Requested';
+  }
 
   const startTime = new Date(request.timeframe);
   const endTime = addMinutes(startTime, request.duration || 0);
