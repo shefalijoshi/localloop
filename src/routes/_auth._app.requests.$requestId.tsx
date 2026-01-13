@@ -6,16 +6,18 @@ import {
   ChevronLeft, 
   MapPin, 
   Clock, 
-  Dog, 
   Phone, 
   Mail, 
   CircleQuestionMark,
   CircleCheck,
   CircleX,
   Brain,
-  BadgeAlert
+  BadgeAlert,
+  Calendar,
+  NotebookText
 } from 'lucide-react'
-import { format } from 'date-fns'
+import { addMinutes, format, formatDuration, intervalToDuration } from 'date-fns'
+import { CATEGORY_INTENT } from '../lib/categoryIntent'
 
 export const Route = createFileRoute('/_auth/_app/requests/$requestId')({
   component: RequestDetailComponent,
@@ -44,7 +46,15 @@ function RequestDetailComponent() {
         .eq('id', requestId)
         .single()
       if (error) throw error
-      return data
+      const {name, size, temperament, special_needs} = data.snapshot_data;
+      const dataWithHelperProfile = {
+        ...data,
+        display_name: name,
+        size,
+        temperament,
+        special_needs
+      }
+      return dataWithHelperProfile
     }
   })
 
@@ -153,12 +163,26 @@ function RequestDetailComponent() {
 
   if (!request) return <div className="p-8 text-center font-serif italic text-[#6B6658]">Request not found.</div>
 
+  const category = CATEGORY_INTENT.find(c => c.id === request.category_id);
+  const action = category?.actions.find(a => a.id === request.action_id);
+
+  const actionLabel = action?.label || '';
+
+  let heading = request?.display_name || '';
+  if (actionLabel) {
+    heading = heading ? `${heading} - ${actionLabel}` : `${actionLabel}`;
+  }
+
+  const startTime = new Date(request.timeframe);
+  const endTime = addMinutes(startTime, request.duration || 0);
+
   const isExpired = new Date(request.expires_at) < new Date()
   const isActive = request.status === 'active'
+  const isCustomRequest = request.action_id === 'custom_service' || request.action_id === 'custom_item'
 
   return (
-    <div className="artisan-page-focus pt-8">
-      <div className="artisan-container-large px-4">
+    <div className="artisan-page-focus">
+      <div className="artisan-container-large">
         {/* Navigation */}
         <button 
           onClick={() => navigate({ to: '/dashboard' })}
@@ -168,29 +192,25 @@ function RequestDetailComponent() {
           <span>Back to Dashboard</span>
         </button>
 
-        {/* Dog Profile Hero */}
-        <header className="artisan-header">
-          <div className="relative inline-block mb-4">
-            <div className="h-24 w-24 bg-white rounded-full shadow-md flex items-center justify-center overflow-hidden border-4 border-white mx-auto">
-              {request.dog_photo ? (
-                <img src={request.dog_photo} alt={request.dog_name} className="h-full w-full object-cover" />
-              ) : (
-                <Dog className="w-10 h-10 text-brand-stone" />
-              )}
-            </div>
-          </div>
-          <h1 className="artisan-header-title">{request.dog_name || 'Dog Walk'}</h1>
-          <p className="artisan-meta-tiny">
-            {request.dog_size}
+        <header className="mb-4 text-center">
+          <h2 className="artisan-header-title">{heading}</h2>
+          <p className="artisan-meta-tiny !text-brand-muted tracking-widest">
+            {category?.label}
           </p>
+          {isCustomRequest && request.details && !actionLabel && (
+            <q className="text-brand-text mt-1">
+              {request.details}
+            </q>
+          )}
         </header>
+
         {/* Action Area */}
         <div className="mt-2">
           {isOwner ? (
             <div className="space-y-4">
-              <h2 className="text-label">
+              {offers?.length !== 0 && (<h2 className="text-label">
                 Neighbors Available ({offers?.length || 0})
-              </h2>
+              </h2>)}
               {offers?.map((offer: any) => (
                 <div key={offer.id} className="artisan-card p-6">
                   <div className="flex justify-between items-start">
@@ -290,7 +310,7 @@ function RequestDetailComponent() {
                       }`}
                     >
                       <Phone className="w-4 h-4" />
-                      <span className="text-brand-dark">Phone</span>
+                      <span className="text-brand-white">Phone</span>
                     </button>
                     <button 
                       onClick={() => setShareEmail(!shareEmail)}
@@ -299,7 +319,7 @@ function RequestDetailComponent() {
                       }`}
                     >
                       <Mail className="w-4 h-4" />
-                      <span className="text-brand-dark">Email</span>
+                      <span className="text-brand-white">Email</span>
                     </button>
                   </div>
                 </div>
@@ -327,27 +347,49 @@ function RequestDetailComponent() {
         </div>
         <div className="space-y-4 mt-2">
           <div className="artisan-card mb-2">
-            {/* 1. Timeframe Section */}
             <div className="artisan-card-inner">
+              {!isCustomRequest && request.details && (
+                <div className="detail-row">
+                  <div className="icon-box">
+                    <NotebookText className="w-4 h-4 text-brand-green" />
+                  </div>
+                  <div>
+                    <p className="text-label block mb-3">Extra Details</p>
+                    <q className="text-brand-dark font-medium">
+                      {request.details}
+                    </q>
+                </div>
+              </div>)}
+              {/* 1. Timeframe Section */}
+              <div className="detail-row">
+                <div className="icon-box">
+                  <Calendar className="w-4 h-4 text-brand-green" />
+                </div>
+                {request.request_type === 'item' && (
+                  <div>
+                    <p className="text-label block mb-3">Pick up and return</p>
+                    <p className="text-brand-dark font-medium">
+                    {format(startTime, 'MMM d')} - {format(endTime, 'MMM d')}
+                    </p>
+                  </div>)
+                }
+                {request.request_type === 'service' && (
+                  <div>
+                    <p className="text-label block mb-3">Starting</p>
+                    <p className="text-brand-dark font-medium">
+                    {format(startTime, 'MMM d HH:mm a')}
+                    </p>
+                  </div>)
+                }
+              </div>
+              {/* 2. Duration Section */}
               <div className="detail-row">
                 <div className="icon-box">
                   <Clock className="w-4 h-4 text-brand-green" />
                 </div>
                 <div>
-                  <p className="text-label block mb-3">Timeframe</p>
-                  <p className="text-brand-dark font-medium">
-                    {request.timeframe ? format(new Date(request.timeframe), 'p') : 'As Soon As Possible'}
-                  </p>
-                </div>
-              </div>
-              {/* 2. Duration Section */}
-              <div className="detail-row">
-                <div className="icon-box">
-                  <Dog className="w-4 h-4 text-brand-green" />
-                </div>
-                <div>
-                  <p className="text-label block mb-3">Planned Duration</p>
-                  <p className="text-brand-dark font-medium">{request.duration} Minutes</p>
+                  <p className="text-label block mb-3">Estimated Time</p>
+                  <p className="text-brand-dark font-medium">{formatDuration(intervalToDuration({start: 0, end: request.duration * 60 * 1000}), { delimiter: ', ' })}</p>
                 </div>
               </div>
               {/* 3. Location Section */}
@@ -356,7 +398,7 @@ function RequestDetailComponent() {
                     <MapPin className="w-4 h-4 text-brand-green" />
                   </div>
                   <div>
-                    <p className="text-label block mb-3">Pickup Address (Verified)</p>
+                    <p className="text-label block mb-3">Address (Verified)</p>
                     <p className="text-brand-dark font-medium">
                       {request.street_name}
                     </p>
@@ -367,28 +409,9 @@ function RequestDetailComponent() {
             </div>
           </div>
 
-          {/* Special Needs Card */}
-          {request.special_needs && (
-            <div className="artisan-card mb-2">
-              <div className="artisan-card-inner">
-                <div className="detail-row">
-                  <div className="icon-box">
-                    <BadgeAlert className="w-4 h-4 text-brand-terracotta" />
-                  </div>
-                  <div>
-                    <p className="text-label block mb-3">Care Instructions</p>
-                    <p className="text-brand-dark font-medium">
-                      "{request.special_needs}"
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Personality Card */}
           {request.temperament && request.temperament.length > 0 && (
-            <div className="artisan-card">
+            <div className="artisan-card mb-2">
               <div className="artisan-card-inner">
                 <div className="detail-row">
                   <div className="icon-box">
@@ -403,6 +426,25 @@ function RequestDetailComponent() {
                         </span>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Special Needs Card */}
+          {request.special_needs && (
+            <div className="artisan-card">
+              <div className="artisan-card-inner">
+                <div className="detail-row">
+                  <div className="icon-box">
+                    <BadgeAlert className="w-4 h-4 text-brand-terracotta" />
+                  </div>
+                  <div>
+                    <p className="text-label block mb-3">Care Instructions</p>
+                    <p className="text-brand-dark font-medium">
+                      "{request.special_needs}"
+                    </p>
                   </div>
                 </div>
               </div>

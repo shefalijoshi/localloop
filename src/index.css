@@ -208,12 +208,12 @@
 
   /* Standardizes data rows (Icon + Text) */
   .detail-row {
-    @apply flex items-center gap-4 py-3 border-b border-brand-border/40 last:border-0;
+    @apply flex gap-2 py-3 border-b border-brand-border/40 last:border-0;
   }
 
   /* Standardizes the small circles behind icons */
   .icon-box {
-    @apply h-10 w-10 bg-brand-stone/50 rounded-full flex items-center 
+    @apply h-6 w-6 bg-brand-stone/50 rounded-full flex items-center 
            justify-center shadow-sm border border-brand-border shrink-0;
   }
 

@@ -220,7 +220,7 @@ function CreateRequestPage() {
 
                 <div className="detail-row">
                   <div className="flex-1">
-                    <label className="text-label">Pickup Address (Verified)</label>
+                    <label className="text-label">Address (Verified)</label>
                     <p className="text-brand-dark truncate">{profile?.address}</p>
                     <p className="artisan-meta-tiny">Neighbors won't see your house number till you approve their offer.</p>
                   </div>

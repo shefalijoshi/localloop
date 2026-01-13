@@ -33,11 +33,11 @@ export function RequestCard({ request, isMine }: RequestCardProps) {
       params={{ requestId: request.id }}
       className="block artisan-card px-4 pt-4 pb-2 hover:shadow-md transition-shadow group"
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-">
         {/* Header Section */}
         <div className="flex justify-between items-start">
           <div className="flex gap-3 items-center">
-            <div className={`h-10 w-10 rounded-2xl ${brandColor} text-white flex items-center justify-center shadow-sm`}>
+            <div className={`icon-box mb-2 transition-transform group-hover:scale-110 ${brandColor} border-none text-white shadow-md`}>
               <Icon className="w-5 h-5" />
             </div>
             <div>
@@ -85,19 +85,27 @@ export function RequestCard({ request, isMine }: RequestCardProps) {
                 {request.subject_tag}
               </span>
 
-              {/* Service Duration */}
-              {request.request_type === 'service' && (
-                <div className="flex items-center gap-1 text-brand-text text-[13px]">
-                  <Clock className="w-4 h-4" />
-                  <span>{request.duration}m</span>
-                </div>
-              )}
-
               {/* Item Borrow Window */}
               {request.request_type === 'item' && (
                 <div className="flex items-center gap-1 text-brand-text text-[13px]">
                   <Calendar className="w-4 h-4" />
                   <span>{format(startTime, 'MMM d')} - {format(returnTime, 'MMM d')}</span>
+                </div>
+              )}
+              
+              {/* Service start time */}
+              {request.request_type === 'service' && (
+                <div className="flex items-center gap-1 text-brand-text text-[13px]">
+                  <Calendar className="w-4 h-4" />
+                  <span>{format(startTime, 'MMM d HH:mm a')}</span>
+                </div>
+              )}
+
+              {/* Service Duration */}
+              {request.request_type === 'service' && (
+                <div className="flex items-center gap-1 text-brand-text text-[13px]">
+                  <Clock className="w-4 h-4" />
+                  <span>{request.duration}m</span>
                 </div>
               )}
 
