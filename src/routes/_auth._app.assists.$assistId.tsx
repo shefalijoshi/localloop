@@ -6,7 +6,6 @@ import {
   MapPin, 
   Phone, 
   Mail, 
-  Dog, 
   Clock, 
   ShieldCheck, 
   Play, 
