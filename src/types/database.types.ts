@@ -956,6 +956,7 @@ export type Database = {
           created_at: string | null
           details: string | null
           expected_duration: number | null
+          helper_email: string | null
           helper_id: string | null
           helper_name: string | null
           helper_phone: string | null
@@ -964,6 +965,7 @@ export type Database = {
           request_type: string | null
           scheduled_time: string | null
           seeker_address: string | null
+          seeker_email: string | null
           seeker_id: string | null
           seeker_name: string | null
           snapshot_data: Json | null
@@ -1054,6 +1056,10 @@ export type Database = {
       generate_invite_code: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
       get_assist_details: { Args: { t_assist_id: string }; Returns: Json }
+      get_dashboard_data: {
+        Args: { filter_categories?: string[] }
+        Returns: Json
+      }
       get_my_profile_id: { Args: never; Returns: string }
       get_neighborhood_feed: { Args: never; Returns: Json }
       get_profile_details: {

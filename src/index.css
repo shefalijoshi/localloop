@@ -74,12 +74,12 @@
 
   /* The primary action pill (Request button on Dashboard) */
   .pill-primary {
-    @apply h-10 px-4 bg-brand-green text-white rounded-full flex items-center gap-2 shadow-sm hover:bg-brand-green-hover transition-colors shrink-0;
+    @apply h-8 px-2 bg-brand-green text-white rounded-full flex items-center gap-1 shadow-sm hover:bg-brand-green-hover transition-colors shrink-0;
   }
 
   /* The secondary action pill (Vouch button on Dashboard) */
   .pill-secondary {
-    @apply h-10 px-4 bg-brand-stone text-brand-green rounded-full flex items-center gap-2 border border-brand-border shadow-sm hover:bg-brand-border transition-colors shrink-0;
+    @apply h-8 px-2 bg-brand-stone text-brand-green rounded-full flex items-center gap-1 border border-brand-border shadow-sm hover:bg-brand-border transition-colors shrink-0;
   }
 
   .artisan-page-focus {
