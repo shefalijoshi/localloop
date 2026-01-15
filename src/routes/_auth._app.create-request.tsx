@@ -112,10 +112,10 @@ function CreateRequestPage() {
   const handleBack = () => {
     if (actionId) {
       // Drop actionId, keep categoryId (Goes from Step 3 -> Step 2)
-      navigate({ from: Route.fullPath, search: { ...search, categoryId } });
+      navigate({ from: Route.fullPath, search: { ...search, actionId: undefined } });
     } else if (categoryId) {
       // Drop everything (Goes from Step 2 -> Step 1)
-      navigate({ from: Route.fullPath, search: {...search} });
+      navigate({ from: Route.fullPath, search: {...search, categoryId: undefined} });
     } else {
       // Go back to dashboard
       navigate({ to: '/dashboard' });
