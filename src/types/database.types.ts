@@ -1056,12 +1056,11 @@ export type Database = {
       generate_invite_code: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
       get_assist_details: { Args: { t_assist_id: string }; Returns: Json }
-      get_dashboard_data: {
+      get_my_profile_id: { Args: never; Returns: string }
+      get_neighborhood_feed: {
         Args: { filter_categories?: string[] }
         Returns: Json
       }
-      get_my_profile_id: { Args: never; Returns: string }
-      get_neighborhood_feed: { Args: never; Returns: Json }
       get_profile_details: {
         Args: { target_id: string }
         Returns: {
