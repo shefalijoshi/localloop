@@ -12,6 +12,7 @@ import { CATEGORY_INTENT } from '../lib/categoryIntent';
 import { ChevronLeft, Send, Loader2 } from 'lucide-react';
 
 type RequestSearchParams = {
+  returnTo: string | undefined;
   categoryId?: string | undefined;
   actionId?: string | undefined;
 };
@@ -19,8 +20,9 @@ type RequestSearchParams = {
 export const Route = createFileRoute('/_auth/_app/create-request')({
   validateSearch: (search: Record<string, unknown>): RequestSearchParams => {
     return {
-      categoryId: search.categoryId as string,
-      actionId: search.actionId as string,
+      returnTo: typeof search.returnTo === 'string' ? search.returnTo : '/dashboard',
+      categoryId: typeof search.categoryId === 'string' ? search.categoryId : undefined,
+      actionId: typeof search.actionId === 'string' ? search.actionId : undefined,
     };
   },
   component: CreateRequestPage,
@@ -100,20 +102,20 @@ function CreateRequestPage() {
   });
 
   const handleCategorySelect = (cat: Category) => {
-    navigate({ search: { ...search, categoryId: cat.id } });
+    navigate({ from: Route.fullPath, search: { ...search, categoryId: cat.id } });
   };
 
   const handleActionSelect = (act: Action) => {
-    navigate({ search: { ...search, actionId: act.id } });
+    navigate({ from: Route.fullPath, search: { ...search, actionId: act.id } });
   };
 
   const handleBack = () => {
     if (actionId) {
       // Drop actionId, keep categoryId (Goes from Step 3 -> Step 2)
-      navigate({ search: { categoryId } });
+      navigate({ from: Route.fullPath, search: { ...search, categoryId } });
     } else if (categoryId) {
       // Drop everything (Goes from Step 2 -> Step 1)
-      navigate({ search: {} });
+      navigate({ from: Route.fullPath, search: {...search} });
     } else {
       // Go back to dashboard
       navigate({ to: '/dashboard' });

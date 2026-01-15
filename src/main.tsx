@@ -16,7 +16,9 @@ const router = createRouter({
   context: {
     queryClient,
     session: null, // These will be filled by the __root.tsx loader
+    user: null,
     profile: null,
+    membershipStatus: null,
   },
   // Since you're using TanStack Query, you might want to 
   // let the query client handle the "loading" states

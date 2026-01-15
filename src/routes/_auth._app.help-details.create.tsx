@@ -3,15 +3,18 @@ import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { Dog, Info, Plus, X } from 'lucide-react'
+import type { PostgrestError } from '@supabase/supabase-js'
 
 type RequestSearchParams = {
-  categoryId?: string;
-  actionId?: string;
+  returnTo?: string;
+  categoryId?: string | undefined;
+  actionId?: string | undefined;
 };
 
 export const Route = createFileRoute('/_auth/_app/help-details/create')({
   validateSearch: (search: Record<string, unknown>): RequestSearchParams => {
     return {
+      returnTo: search.returnTo as string,
       categoryId: search.categoryId as string,
       actionId: search.actionId as string,
     };
@@ -75,7 +78,7 @@ function CreateHelpDetailComponent() {
           actionId: search.actionId 
         }  })
     },
-    onError: (err: any) => setError(err.message)
+    onError: (err: PostgrestError) => setError(err.message)
   })
 
   return (
@@ -109,7 +112,7 @@ function CreateHelpDetailComponent() {
               {['small', 'medium', 'large', 'giant'].map((s) => (
                 <button
                 key={s}
-                onClick={() => setSize(s as any)}
+                onClick={() => setSize(s as 'small' | 'medium' | 'large' | 'giant')}
                 className={`artisan-toggle-btn ${
                   size === s ? 'artisan-toggle-btn-active' : 'artisan-toggle-btn-inactive'
                 }`}

@@ -98,7 +98,11 @@ function DashboardPage() {
     <div className="pb-2 artisan-page-focus">
       {/* Action Pills */}
       <div className="artisan-container-large flex items-center justify-end gap-3 mb-10">
-        <Link to="/create-request" className="pill-primary">
+        <Link to="/create-request" className="pill-primary" search={{ 
+            returnTo: undefined,
+            categoryId: undefined,
+            actionId: undefined 
+          }}>
           <PlusCircle className="w-4 h-4" />
           <span className="text-label text-white">Request</span>
         </Link>
