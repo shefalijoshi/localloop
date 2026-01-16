@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { createFileRoute, useRouter, redirect } from '@tanstack/react-router'
 import { supabase } from '../lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
-import { getCoordsFromAddress } from '../lib/geocoding'
-import { User, MapPin, ShieldCheck, Key, Home } from 'lucide-react'
+import { getCoordsFromAddress, getDistanceInMeters } from '../lib/geocoding'
+import { User, MapPin, ShieldCheck, Key, Home, Dot } from 'lucide-react'
 import { PasscodeInput } from '../components/PasscodeInput'
 
 export const Route = createFileRoute('/_auth/create-profile')({
@@ -25,11 +25,15 @@ function CreateProfileComponent() {
   const [address, setAddress] = useState(profile?.address || '')
   const [inviteCode, setInviteCode] = useState('')
   const [coords, setCoords] = useState<{lat:number, lng: number} | null>(null)
+  const [isLocationVerified, setIsLocationVerified] = useState<boolean>(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
   
   const [step, setStep] = useState<'name' | 'choice' | 'executing'>('name')
   const [method, setMethod] = useState<'join' | 'create' | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [isValidatingLocation, setIsValidatingLocation] = useState(false)
+  const [isGettingCoords, setIsGettingCoords] = useState(false)
 
   useEffect(() => {
     if (address.length < 5) {
@@ -37,7 +41,7 @@ function CreateProfileComponent() {
       return;
     }
     const controller = new AbortController();
-    setIsValidatingLocation(true);
+    setIsGettingCoords(true);
     const delayDebounceFn = setTimeout(async () => {
       try {
         const result = await getCoordsFromAddress(address, controller.signal);
@@ -47,7 +51,7 @@ function CreateProfileComponent() {
           setCoords(null);
         }
       } finally {
-        setIsValidatingLocation(false);
+        setIsGettingCoords(false);
       }
     }, 600);
     return () => {
@@ -74,7 +78,8 @@ function CreateProfileComponent() {
       const { error: rpcError } = await supabase.rpc('join_neighborhood', {
         invite_code_text: inviteCode.trim(),
         user_lat: coords.lat,
-        user_lng: coords.lng
+        user_lng: coords.lng,
+        locationVerified: isLocationVerified
       })
       if (rpcError) throw rpcError
 
@@ -98,7 +103,8 @@ function CreateProfileComponent() {
       const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
         neighborhood_name: neighborhoodName.trim(),
         user_lat: coords.lat,
-        user_lng: coords.lng
+        user_lng: coords.lng,
+        locationVerified: isLocationVerified || false
       })
       if (rpcError) {
         if (rpcError.message.includes('COLLISION')) {
@@ -122,14 +128,56 @@ function CreateProfileComponent() {
     }
   }
 
+  const verifyWithWatch = () => {
+    if (!coords) {
+      setVerificationError("Please enter your address first.");
+      return;
+    }
+
+    setVerificationError(null);
+    setIsVerifying(true);
+    setIsLocationVerified(false);
+
+    const addressCoords: [number, number] = [coords.lng, coords.lat];
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const userCoords: [number, number] = [position.coords.longitude, position.coords.latitude];
+        setAccuracy(position.coords.accuracy);
+
+        const distance = getDistanceInMeters(userCoords, addressCoords);
+
+        if (distance <= 100) {
+          setIsLocationVerified(true);
+          setIsVerifying(false);
+          navigator.geolocation.clearWatch(watchId);
+        }
+      },
+      (error) => {
+        console.log(error);
+        navigator.geolocation.clearWatch(watchId);
+        setIsVerifying(false);
+        setVerificationError("Location access denied. Please use manual verification with a neighbor." );
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+
+    setTimeout(() => {
+      navigator.geolocation.clearWatch(watchId);
+      setIsLocationVerified(false);
+      setIsVerifying(false);
+      setVerificationError("Your current location could not be verified. Please use manual verification with a neighbor.");
+    }, 15000);
+  };
+
   return (
-    <div className="artisan-page-focus pt-12 pb-20 px-6">
+    <div className="artisan-page-focus pt-2 pb-20 px-6">
       <div className="artisan-container-sm">
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex items-center justify-center mb-1">
           <img 
             src="/logo.png" 
             alt="LocalLoop" 
-            className="h-16 w-auto mb-3"
+            className="h-10 w-auto"
           />
           <span className="text-2xl font-bold text-brand-terracotta">LocalLoop</span>
         </div>
@@ -142,9 +190,6 @@ function CreateProfileComponent() {
         {step === 'name' && (
           <div className="animate-in slide-in-from-bottom-4 duration-700">
             <header className="artisan-header">
-              <div className="badge-pill mb-4 tracking-widest">
-                Step 01 — Identity
-              </div>
               <h1 className="artisan-header-title">Resident Profile</h1>
               <p className="artisan-header-description">
                 Please provide your details as they should appear to your neighbors.
@@ -152,7 +197,7 @@ function CreateProfileComponent() {
             </header>
 
             <div className="artisan-card border-brand-green">
-              <div className="artisan-card-inner space-y-6 text-left">
+              <div className="artisan-card-inner space-y-2 text-left">
                 
                 {/* Name Input Group */}
                 <div className="detail-row border-b-0 pb-0 items-start">
@@ -183,42 +228,50 @@ function CreateProfileComponent() {
                         }`}
                         placeholder="Search your street address..."
                         value={address}
-                        onChange={(e) => setAddress(e.target.value)}
+                        onChange={(e) => {setAddress(e.target.value); setVerificationError(null)}}
                       />
-                      <div className="input-adornment-right">
-                        {isValidatingLocation && (
+                      {/* <div className="input-adornment-right">
+                        {isGettingCoords && (
                           <div className="h-4 w-4 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
                         )}
-                        {coords && !isValidatingLocation && (
+                        {coords && !isGettingCoords && (
                           <div className="text-brand-green animate-in zoom-in">
                             <ShieldCheck className="w-5 h-5" />
                           </div>
                         )}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
-
-                {coords && (
-                  <div className="flex justify-center animate-in slide-in-from-top-2">
+                {coords && (<div className={`flex justify-center animate-in slide-in-from-top-2 ${isVerifying || verificationError ? '' : 'underline'}`}>
+                  {!isLocationVerified ? (
+                    <button 
+                      type="button"
+                      onClick={verifyWithWatch}
+                      disabled={!address || !coords}
+                    >
+                      {isVerifying ? 
+                        <span><Dot className="animate-ping inline"/> Searching for GPS (Accuracy: {accuracy?.toFixed(0)} meters)</span>
+                      : verificationError ? `${verificationError}` : "Verify My Location"}
+                    </button>
+                  ) : (
                     <div className="badge-pill border border-brand-green/20 text-brand-green py-1.5 flex items-center gap-2">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span className="alert-meta-tiny">Location Verified</span>
                     </div>
-                  </div>
-                )}
-
-                <div className="pt-2">
-                  <button 
-                    onClick={() => setStep('choice')}
-                    disabled={name.length < 2 || !coords || isValidatingLocation}
-                    className="btn-primary"
-                  >
-                    Continue to Access
-                  </button>
-                </div>
+                  )}
+                </div>)}
               </div>
             </div>
+            <div className="pt-2">
+              <button 
+                onClick={() => setStep('choice')}
+                disabled={name.length < 2 || !coords || isGettingCoords}
+                className="btn-primary"
+              >
+                Continue to Access
+              </button>
+              </div>
           </div>
         )}
 
