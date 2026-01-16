@@ -53,8 +53,8 @@ function AppLayout() {
       <main className="flex-1 w-full mx-auto px-6 pt-6">
         {/* Global Identity Bar: Branding Left, Profile Right */}
         <header className="mb-4 flex justify-between items-center border-b border-brand-border pb-4">
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Link to="/dashboard" className="flex items-center gap-1">
               <img 
                 src="/logo.png" 
                 alt="LocalLoop" 

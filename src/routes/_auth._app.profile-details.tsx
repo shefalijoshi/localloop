@@ -96,8 +96,8 @@ function ProfilePage() {
             <span>Back to Dashboard</span>
           </button>
           <button className="pill-secondary" onClick={() => handleSignout()}>
-            <LogOut className="w-4 h-4" />
-            <span className="text-label text-brand-green">Sign out</span>
+            <LogOut className="w-3 h-3" />
+            <span className="text-sm text-brand-green">Sign out</span>
           </button>
         </div>
         <header className="artisan-header">
