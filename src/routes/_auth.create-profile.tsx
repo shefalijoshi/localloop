@@ -103,8 +103,7 @@ function CreateProfileComponent() {
       const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
         neighborhood_name: neighborhoodName.trim(),
         user_lat: coords.lat,
-        user_lng: coords.lng,
-        locationVerified: isLocationVerified
+        user_lng: coords.lng
       })
       if (rpcError) {
         if (rpcError.message.includes('COLLISION')) {
@@ -151,6 +150,7 @@ function CreateProfileComponent() {
           setIsLocationVerified(true);
           setIsVerifying(false);
           navigator.geolocation.clearWatch(watchId);
+          setVerificationError(null);
         }
       },
       (error) => {
