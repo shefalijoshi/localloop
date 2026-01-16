@@ -545,6 +545,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           id: string
+          map_image_url: string | null
           name: string
           radius_miles: number | null
         }
@@ -554,6 +555,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          map_image_url?: string | null
           name: string
           radius_miles?: number | null
         }
@@ -563,6 +565,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          map_image_url?: string | null
           name?: string
           radius_miles?: number | null
         }

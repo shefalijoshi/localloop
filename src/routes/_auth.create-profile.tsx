@@ -77,6 +77,9 @@ function CreateProfileComponent() {
         user_lng: coords.lng
       })
       if (rpcError) throw rpcError
+
+      sessionStorage.setItem('showNeighborhoodWelcome', 'true')
+      
       await queryClient.invalidateQueries()
       await router.invalidate()
       window.location.replace('/')
@@ -107,6 +110,9 @@ function CreateProfileComponent() {
         setStep('choice')
         return
       }
+
+      sessionStorage.setItem('showNeighborhoodWelcome', 'true')
+
       await queryClient.invalidateQueries()
       await router.invalidate()
       window.location.replace('/')

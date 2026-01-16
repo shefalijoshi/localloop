@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { ChevronLeft } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/invite')({
   component: InvitePage,
@@ -14,6 +15,7 @@ function InvitePage() {
   const { profile } = Route.useRouteContext()
   const queryClient = useQueryClient()
   const router = useRouter()
+  const navigate = useNavigate()
 
   const createInvite = useMutation({
     mutationFn: async () => {
@@ -50,8 +52,11 @@ function InvitePage() {
 
   return (
     <div className="artisan-page-focus">
-      <div className="artisan-container-sm">
-        
+      <div className="artisan-container-large">
+        <button onClick={() => navigate({ to: '/dashboard' })} className="nav-link-back">
+          <ChevronLeft className="w-4 h-4" />
+          <span>Back to Dashboard</span>
+        </button>
         <header className="artisan-header">
           <div className="badge-pill mb-4">Network Expansion</div>
           <h1 className="artisan-header-title">Invite a Neighbor</h1>
@@ -114,15 +119,6 @@ function InvitePage() {
             <span className="alert-body">Please check your connection and try again.</span>
           </div>
         )}
-
-        <div className="flex justify-center mt-12">
-          <button
-            onClick={() => router.navigate({ to: '/dashboard' })}
-            className="link-standard"
-          >
-            ← Back to Dashboard
-          </button>
-        </div>
       </div>
     </div>
   )

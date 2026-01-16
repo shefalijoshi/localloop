@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { ChevronLeft } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/vouch')({
   component: VouchEntryPage,
@@ -64,7 +65,11 @@ function VouchEntryPage() {
 
   return (
     <div className="artisan-page-focus">
-      <div className="artisan-container-sm max-w-sm">
+      <div className="artisan-container-large">
+        <button onClick={() => navigate({ to: '/dashboard' })} className="nav-link-back">
+          <ChevronLeft className="w-4 h-4" />
+          <span>Back to Dashboard</span>
+        </button>
         <header className="artisan-header">
           <div className="badge-pill mb-4">
             Security: Handshake
@@ -92,13 +97,6 @@ function VouchEntryPage() {
             </form>
           </div>
         </div>
-  
-        <button 
-            onClick={() => navigate({ to: '/dashboard' })} 
-            className="nav-link-back w-full justify-center mt-6"
-          >
-            Cancel and Return
-        </button>
       </div>
     </div>
   )

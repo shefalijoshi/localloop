@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet, redirect, useRouteContext, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { UserPlus } from 'lucide-react'
+import { ShieldCheck, UserPlus, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/_auth/_app')({
   beforeLoad: ({ context }) => {
@@ -14,13 +15,15 @@ export const Route = createFileRoute('/_auth/_app')({
 
 function AppLayout() {
   const { profile } = useRouteContext({ from: '/_auth/_app' })
+  const [showMapToast, setShowMapToast] = useState(false)
+  const hasShownToast = useRef(false)
 
   const { data: neighborhood } = useQuery({
     queryKey: ['neighborhood', profile?.neighborhood_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('neighborhoods')
-        .select('name')
+        .select('name, map_image_url')
         .eq('id', profile?.neighborhood_id)
         .single()
       if (error) throw error
@@ -29,8 +32,23 @@ function AppLayout() {
     enabled: !!profile?.neighborhood_id,
   })
 
+  useEffect(() => {
+    const shouldShowWelcome = sessionStorage.getItem('showNeighborhoodWelcome')
+    
+    if (shouldShowWelcome === 'true' && neighborhood && !hasShownToast.current) {
+      hasShownToast.current = true
+      sessionStorage.removeItem('showNeighborhoodWelcome')
+      
+      setTimeout(() => {
+        setShowMapToast(true)
+        
+        setTimeout(() => setShowMapToast(false), 6000)
+      }, 0)
+    }
+  }, [neighborhood])
+
   return (
-    /*bg-[#F9F7F2] */
+    
     <div className="min-h-screen">
       <main className="flex-1 w-full mx-auto px-6 pt-6">
         {/* Global Identity Bar: Branding Left, Profile Right */}
@@ -64,6 +82,40 @@ function AppLayout() {
             )}
           </Link>
         </header>
+
+        {showMapToast && neighborhood && (
+          <div className="fixed top-24 right-6 z-50 animate-in slide-in-from-top-2 fade-in duration-500">
+            <div className="artisan-card border-brand-green shadow-xl max-w-sm">
+              <div className="p-4 flex gap-3 items-start">
+                {neighborhood.map_image_url && (
+                  <img 
+                    src={neighborhood.map_image_url} 
+                    alt="Neighborhood" 
+                    className="w-16 h-16 rounded-lg border border-brand-green/20 flex-shrink-0 object-cover"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <ShieldCheck className="w-4 h-4 text-brand-green flex-shrink-0" />
+                    <p className="font-semibold text-sm text-brand-dark">
+                      Welcome to {neighborhood.name}!
+                    </p>
+                  </div>
+                  <p className="text-xs text-brand-muted leading-relaxed">
+                    Click your profile to view your neighborhood map
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowMapToast(false)}
+                  className="text-brand-muted hover:text-brand-dark transition-colors flex-shrink-0 -mt-1"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Outlet />
         

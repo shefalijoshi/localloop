@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { MapPin, Mail, ShieldCheck, ChevronLeft, Clock, UserCheck, LogOut } from 'lucide-react'
+import { MapPin, Mail, ShieldCheck, ChevronLeft, Clock, UserCheck, LogOut, Map } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/profile-details')({
   component: ProfilePage,
@@ -20,6 +20,20 @@ function ProfilePage() {
       return { ...profile, email };
     },
     enabled: !!profile?.id,
+  })
+
+  const { data: neighborhood } = useQuery({
+    queryKey: ['neighborhood', profile?.neighborhood_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('neighborhoods')
+        .select('name, map_image_url')
+        .eq('id', profile?.neighborhood_id)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!profile?.neighborhood_id,
   })
 
   const handleSignout = async () => {
@@ -74,20 +88,20 @@ function ProfilePage() {
   }
 
   return (
-    <div className="artisan-page-focus pt-8">
+    <div className="artisan-page-focus">
       <div className="artisan-container-large px-4">
-        <button onClick={() => navigate({ to: '/dashboard' })} className="nav-link-back">
-          <ChevronLeft className="w-4 h-4" />
-          <span>Back to Dashboard</span>
-        </button>
-
+        <div className="flex justify-between">
+          <button onClick={() => navigate({ to: '/dashboard' })} className="nav-link-back">
+            <ChevronLeft className="w-4 h-4" />
+            <span>Back to Dashboard</span>
+          </button>
+          <button className="pill-secondary" onClick={() => handleSignout()}>
+            <LogOut className="w-4 h-4" />
+            <span className="text-label text-brand-green">Sign out</span>
+          </button>
+        </div>
         <header className="artisan-header">
           <h1 className="artisan-header-title">{fullProfile?.display_name}</h1>
-          
-          <div className={`badge-pill mt-4 border flex items-center justify-center gap-2 mx-auto w-fit ${statusStyle.classes}`}>
-            {statusStyle.icon}
-            <span>{statusStyle.label}</span>
-          </div>
         </header>
 
         <div className="space-y-6">
@@ -118,6 +132,36 @@ function ProfilePage() {
             </div>
           </section>
 
+          {neighborhood?.map_image_url && (
+            <section className="artisan-card border-brand-terracotta">
+              <div className="artisan-card-inner">
+                <div className="mb-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="icon-box">
+                      <Map className="w-4 h-4 text-brand-green" />
+                    </div>
+                    <h2 className="text-label text-lg font-semibold">{neighborhood.name} boundary area</h2>
+                  </div>
+                </div>
+                
+                <div className="rounded-lg overflow-hidden border border-brand-green/20 shadow-sm">
+                  <img 
+                    src={neighborhood.map_image_url} 
+                    alt={`${neighborhood.name} neighborhood boundary map`}
+                    className="w-full h-auto"
+                  />
+                </div>
+                
+                <div className="mt-4 flex items-start gap-2 text-xs text-brand-muted italic">
+                  <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-brand-green" />
+                  <p className="leading-relaxed">
+                    This map shows the verified boundary of your local neighborhood registry.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Conditional Alerts using brand colors for terracotta (errors) and green (success) */}
           <div className={`${membershipStatus === 'active' ? 'alert-success' : 'alert-error'} border-dashed`}>
             <p className="alert-body italic opacity-80 px-4">
@@ -127,15 +171,6 @@ function ProfilePage() {
                 ? "Verification in progress: We are confirming your neighborhood location."
                 : "Awaiting a second neighbor vouch to activate your account."}
             </p>
-          </div>
-
-          <div className="pt-4 flex justify-center">
-            <div className="w-full max-w-sm">
-              <button className="btn-primary border-brand-border text-white hover:border-brand-green hover:text-brand-green" onClick={() => handleSignout()}>
-                <LogOut className="w-4 h-4" />
-                Sign out
-              </button>
-            </div>
           </div>
         </div>
       </div>
