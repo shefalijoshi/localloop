@@ -1083,7 +1083,7 @@ export type Database = {
         Returns: string
       }
       join_neighborhood: {
-        Args: { invite_code_text: string; user_lat: number; user_lng: number }
+        Args: { invite_code_text: string; user_lat: number; user_lng: number; locationVerified: boolean }
         Returns: Database["public"]["Enums"]["membership_status"]
       }
       request_vouch_handshake: { Args: never; Returns: string }
