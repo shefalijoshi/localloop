@@ -79,7 +79,7 @@ function CreateProfileComponent() {
         invite_code_text: inviteCode.trim(),
         user_lat: coords.lat,
         user_lng: coords.lng,
-        locationVerified: isLocationVerified
+        locationverified: isLocationVerified
       })
       if (rpcError) throw rpcError
 
