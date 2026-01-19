@@ -40,6 +40,14 @@ function LoginComponent() {
     <div className="bg-hero-vision md:bg-hero-vision-md flex-grow flex flex-col font-serif">
       <main className="flex-grow">
         {/* Header Section */}
+        <div className="flex items-center justify-center mt-5">
+          <img 
+            src="/logo.png" 
+            alt="LocalLoop" 
+            className="h-10 w-auto"
+          />
+          <span className="text-2xl font-bold text-brand-terracotta">LocalLoop</span>
+        </div>
         <header className="p-8 text-center">
           <h1 className="text-xl md:3xl font-bold text-brand-dark mb-4">
             The neighbors you wave to could become the friends you rely on.
