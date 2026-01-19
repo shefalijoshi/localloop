@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Mail, ShieldCheck, MapPin, DoorOpen, Map, HelpingHand, Target } from 'lucide-react'
 import { supabase } from '../lib/supabase' 
+import { FeatureCard } from '../components/Feature'
 
 export const Route = createFileRoute('/login')({
   beforeLoad: ({ context }) => {
@@ -40,10 +41,10 @@ function LoginComponent() {
       <main className="flex-grow">
         {/* Header Section */}
         <header className="p-8 text-center">
-          <h1 className="text-3xl font-bold text-brand-dark mb-4">
+          <h1 className="text-xl md:3xl font-bold text-brand-dark mb-4">
             The neighbors you wave to could become the friends you rely on.
           </h1>
-          <p className="text-lg text-brand-text max-w-md mx-auto">
+          <p className="text-sm text-brand-text max-w-md mx-auto">
             Community starts at your doorstep. This is how neighborhoods come alive.
           </p>
         </header>
@@ -74,6 +75,7 @@ function LoginComponent() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-muted" />
                 <input
                   type="email"
+                  autoComplete='email'
                   placeholder="Enter your email"
                   className="artisan-input pl-12"
                   value={email}
@@ -88,7 +90,7 @@ function LoginComponent() {
                   disabled={loading || !email}
                   className="btn-primary bg-brand-terracotta text-white"
                 >
-                  {loading ? 'Verifying...' : 'Sign in'}
+                  {loading ? 'Verifying...' : 'Join or Start your neighborhood'}
                 </button>
 
                 <button 
@@ -104,45 +106,47 @@ function LoginComponent() {
         </div>
 
         {/* Bento Grid */}
-        <div className="bento-grid mt-15">
-          {/* Main Auth Card */}
-          <div className="card-main-focus rounded-bento-lg card-trust glass-morphism">
-            <div className="flex items-start gap-2 mb-2">
-              <ShieldCheck className="w-6 h-6 text-brand-dark" />
-              <h3 className="font-bold text-brand-dark">Vouched Neighbors</h3>
-            </div>
-            <div className='w-full h-full bg-flow'>
-              <p className="text-sm text-brand-text hidden md:block mt-1">Invitation → Verify (location or neighbor) → Welcome</p>
-            </div>
-          </div>
+        <div className="bento-grid mt-5 md:mt-15">
+          <FeatureCard
+            Icon={ShieldCheck} 
+            index={0}
+            title="Vouched Neighbors" 
+            desc="Verified residents only. Join by invitation. Verify with location or neighbor vouch." 
+            colorClass="card-trust card-main-focus"
+            bgClass="bg-flow"
+          />
 
-          {/* Vision Feature Cards */}
-          <FeatureCard 
+          <FeatureCard
             Icon={MapPin} 
+            index={1}
             title="Walking Distance" 
             desc="0.5 miles. Real proximity, real community." 
             colorClass="card-local" 
           />
           <FeatureCard 
             Icon={HelpingHand} 
+            index={2}
             title="Help & Borrow" 
             desc="Ask for what you need. Offer what you can." 
             colorClass="card-help" 
           />
           <FeatureCard 
             Icon={Map} 
+            index={3}
             title="Know Your Area" 
             desc="Stay connected to what's happening on your block." 
             colorClass="card-social" 
           />
           <FeatureCard 
             Icon={DoorOpen} 
+            index={4}
             title="Meet on the Porch" 
             desc="The app makes asking easy. The relationship happens in person." 
             colorClass="card-local" 
           />
           <FeatureCard 
             Icon={Target} 
+            index={5}
             title="Deeds over Feeds" 
             desc="Real requests. Real neighbors. No endless scrolling." 
             colorClass="card-deeds" 
@@ -156,18 +160,6 @@ function LoginComponent() {
           © {new Date().getFullYear()} LocalLoop. Verified Residents Only.
         </p>
       </footer>
-    </div>
-  )
-}
-
-function FeatureCard({ Icon, title, desc, colorClass }: { Icon: any, title: string, desc: string, colorClass: string }) {
-  return (
-    <div className={`card-feature rounded-bento-sm ${colorClass} glass-morphism`}>
-      <Icon className="w-6 h-6 shrink-0 text-brand-dark opacity-80" strokeWidth={2} />
-      <div>
-        <h3 className="font-bold text-brand-dark">{title}</h3>
-        <p className="text-sm text-brand-text hidden md:block mt-1">{desc}</p>
-      </div>
     </div>
   )
 }

@@ -80,7 +80,7 @@
   }
 
   .card-feature {
-    @apply p-2 flex gap-2 items-center md:items-start hover:scale-[1.02] transition-transform;
+    @apply p-2 h-fit flex flex-col gap-2 items-start hover:scale-[1.02] transition-transform;
   }
 
   .bg-flow {
