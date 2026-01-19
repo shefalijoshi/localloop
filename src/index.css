@@ -27,6 +27,17 @@
 
   /* --- Animations (Used in Dashboard & Vouch) --- */
   --animate-in: fade-in 0.5s ease-out;
+
+  --bento-text-main: #1a202c;
+  --bento-text-muted: #4a5568;
+  --bento-bg-page: #fdfcf8;
+  
+  /* Bento Energy Palette */
+  --color-trust-blue: rgba(182, 216, 255, 0.9);
+  --color-local-yellow: rgba(255, 243, 197, 0.9);
+  --color-social-green: rgba(210, 255, 229, 0.9);
+  --color-help-pink: rgba(255, 228, 249, 0.9);
+  --color-deeds-azure: rgba(233, 244, 255, 0.9);
 }
 
 @layer base {
@@ -43,6 +54,60 @@
 }
 
 @layer components {
+  .bg-hero-vision {
+    @apply min-h-screen flex flex-col transition-all bg-no-repeat bg-top bg-auto;
+    background-color: var(--bento-bg-page);
+    background-image: 
+      linear-gradient(rgba(253, 252, 248, 0.7), rgba(253, 252, 248, 0.7)), 
+      url('/hero_background.webp');
+  }
+
+  .bg-hero-vision-md {
+    @apply bg-contain;
+  }
+
+  /* 2. Layout: Bento Grid & Positioning */
+  .bento-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-6 mb-12;
+  }
+
+  .card-main-focus {
+    @apply col-span-2 md:row-span-5 p-4 flex flex-col justify-center min-h-[400px];
+  }
+
+  .card-feature {
+    @apply p-2 flex gap-2 items-center md:items-start hover:scale-[1.02] transition-transform;
+  }
+
+  .bg-flow {
+    @apply lg:bg-no-repeat lg:bg-[url('/vouch_flow.webp')] lg:bg-size-[55%] lg:bg-[70%_50%];
+  }
+
+  /* 3. Input & Form Elements */
+  .input-magic-link {
+    @apply w-full pl-12 pr-4 py-4 rounded-2xl border-none bg-white shadow-inner text-lg outline-none ring-offset-2;
+    @apply focus:ring-2;
+    focus-within: ring-[var(--terracotta)];
+  }
+
+  /* 4. Semantic Roundness & Glass */
+  .rounded-bento-lg { border-radius: 32px; }
+  .rounded-bento-sm { border-radius: 28px; }
+
+  .glass-morphism {
+    @apply backdrop-blur-md border border-white/50 shadow-sm transition-transform duration-200;
+  }
+
+  /* 5. Color Tokens */
+  .text-vision-main { color: var(--bento-text-main); }
+  .text-vision-muted { color: var(--bento-text-muted); }
+  .bg-brand-terracotta { background-color: var(--terracotta); @apply text-white hover:brightness-110; }
+  
+  .card-trust { background-color: var(--color-trust-blue); }
+  .card-local { background-color: var(--color-local-yellow); }
+  .card-social { background-color: var(--color-social-green); }
+  .card-help { background-color: var(--color-help-pink); }
+  .card-deeds { background-color: var(--color-deeds-azure); }
   /* The "Primary Action" - Muted Forest Green */
   .btn-primary {
     @apply w-full py-4 bg-brand-green text-white rounded-2xl capitalize tracking-widest 
