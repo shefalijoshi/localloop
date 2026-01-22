@@ -65,14 +65,14 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, mode,
               {(method === 'join' || method === 'request') && <div className="flex space-x-10 mt-10 justify-center">
                 <button 
                   disabled={!inviteCode}
-                  className="btn-secondary"
+                  className="btn-primary"
                   onClick={() => handleJoin()}
                 >
                   Confirm Registration
                 </button>
                 <button 
                   disabled={!!inviteCode}
-                  className="btn-tertiary hidden"
+                  className="btn-tertiary"
                   onClick={() => handleRequest()}
                 >
                   Request an Invite Code

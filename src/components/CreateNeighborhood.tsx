@@ -67,7 +67,7 @@ export function CreateNeighborhood({ coords, isLocationVerified, onComplete, met
             {method === 'create' && <div className="mt-10">
               <button 
                 disabled={!neighborhoodName || !isLocationVerified}
-                className="btn-primary"
+                className="btn-secondary"
                 onClick={() => handleCreate()}
               >
                 Confirm Registration
