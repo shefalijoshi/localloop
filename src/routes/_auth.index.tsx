@@ -5,7 +5,7 @@ export const Route = createFileRoute('/_auth/')({
   beforeLoad: ({ context }) => {
     const { profile, membershipStatus } = context
 
-    if (!profile?.display_name || !membershipStatus) {
+    if (!profile?.display_name || !membershipStatus || membershipStatus === 'request_pending') {
       throw redirect({ to: '/create-profile' })
     }
 

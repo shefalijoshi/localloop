@@ -3,8 +3,9 @@ import { createFileRoute, useRouter, redirect } from '@tanstack/react-router'
 import { supabase } from '../lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import { getCoordsFromAddress, getDistanceInMeters } from '../lib/geocoding'
-import { User, MapPin, ShieldCheck, Key, Home, Dot, ChevronLeft } from 'lucide-react'
-import { PasscodeInput } from '../components/PasscodeInput'
+import { User, MapPin, ShieldCheck, Dot, ChevronLeft } from 'lucide-react'
+import { JoinNeighborhood } from '../components/JoinNeighborhood'
+import { CreateNeighborhood } from '../components/CreateNeighborhood'
 
 export const Route = createFileRoute('/_auth/create-profile')({
   beforeLoad: ({ context }) => {
@@ -21,9 +22,7 @@ function CreateProfileComponent() {
   const { profile } = Route.useRouteContext()
   
   const [name, setName] = useState(profile?.display_name || '')
-  const [neighborhoodName, setNeighborhoodName] = useState('')
   const [address, setAddress] = useState(profile?.address || '')
-  const [inviteCode, setInviteCode] = useState('')
   const [coords, setCoords] = useState<{lat:number, lng: number} | null>(null)
   const [isLocationVerified, setIsLocationVerified] = useState<boolean>(false)
   const [isVerifying, setIsVerifying] = useState(false)
@@ -31,6 +30,7 @@ function CreateProfileComponent() {
   const [accuracy, setAccuracy] = useState<number | null>(null);
   
   const [step, setStep] = useState<'name' | 'choice' | 'executing'>('name')
+  const [mode, setMode] = useState<'withCode' | 'request'>('withCode');
   const [method, setMethod] = useState<'join' | 'create' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isGettingCoords, setIsGettingCoords] = useState(false)
@@ -61,69 +61,33 @@ function CreateProfileComponent() {
   }, [address]);
 
   const updateProfile = async () => {
+    if (!name || !coords || !address) return
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase
       .from('profiles')
       .update({ display_name: name, address: address })
       .eq('user_id', user?.id);
     if (error) throw error;
+
+    if (!isLocationVerified) {
+      setMethod('join')
+    }
+    setStep('choice')
   };
 
-  const handleJoin = async () => {
-    if (!inviteCode || !coords) return
-    setStep('executing')
-    setError(null)
-    try {
-      await updateProfile();
-      const { error: rpcError } = await supabase.rpc('join_neighborhood', {
-        invite_code_text: inviteCode.trim(),
-        user_lat: coords.lat,
-        user_lng: coords.lng,
-        locationverified: isLocationVerified
-      })
-      if (rpcError) throw rpcError
+  const handleComplete = async (type: string) => {
+    if (type !== 'create') {
+      setError(type)
+      setMode('request')
+    } else {
+      setStep('executing')
+      setError(null)
 
       sessionStorage.setItem('showNeighborhoodWelcome', 'true')
       
       await queryClient.invalidateQueries()
       await router.invalidate()
       window.location.replace('/')
-    } catch (err: any) {
-      setError(err.message || 'Failed to join neighborhood')
-      setStep('choice')
-    }
-  }
-
-  const handleCreate = async () => {
-    if (!name || !neighborhoodName || !coords || !address || !isLocationVerified) return
-    setStep('executing')
-    setError(null)
-    try {
-      await updateProfile();
-      const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
-        neighborhood_name: neighborhoodName.trim(),
-        user_lat: coords.lat,
-        user_lng: coords.lng
-      })
-      if (rpcError) {
-        if (rpcError.message.includes('COLLISION')) {
-          setError(rpcError.message.replace('COLLISION:', ''))
-          setMethod('join') 
-        } else {
-          throw rpcError
-        }
-        setStep('choice')
-        return
-      }
-
-      sessionStorage.setItem('showNeighborhoodWelcome', 'true')
-
-      await queryClient.invalidateQueries()
-      await router.invalidate()
-      window.location.replace('/')
-    } catch (err: any) {
-      setError(err.message || 'Failed to create neighborhood')
-      setStep('choice')
     }
   }
 
@@ -232,16 +196,6 @@ function CreateProfileComponent() {
                         value={address}
                         onChange={(e) => {setAddress(e.target.value); setVerificationError(null)}}
                       />
-                      {/* <div className="input-adornment-right">
-                        {isGettingCoords && (
-                          <div className="h-4 w-4 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
-                        )}
-                        {coords && !isGettingCoords && (
-                          <div className="text-brand-green animate-in zoom-in">
-                            <ShieldCheck className="w-5 h-5" />
-                          </div>
-                        )}
-                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -267,7 +221,7 @@ function CreateProfileComponent() {
             </div>
             <div className="pt-2">
               <button 
-                onClick={() => setStep('choice')}
+                onClick={() => updateProfile()}
                 disabled={name.length < 2 || !coords || isGettingCoords}
                 className="btn-primary"
               >
@@ -290,75 +244,24 @@ function CreateProfileComponent() {
               <h2 className="artisan-header-title text-2xl">Neighborhood Entry</h2>
               <p className="artisan-header-description">Welcome, {name.split(' ')[0]}!</p>
             </header>
-
-            <div className="grid gap-5 text-left">
-              <button 
+            <div className="grid gap-5 text-left ">
+              <div 
                 onClick={() => setMethod('join')}
-                className={`artisan-card transition-all ${
+                className={`artisan-card transition-all text-center ${
                   method === 'join' ? 'border-brand-green' : 'border-transparent'
                 }`}
               >
-                <div className="p-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="icon-box text-brand-green">
-                      <Key className="w-4 h-4" />
-                    </div>
-                    <h3 className="artisan-card-title text-lg">Join Existing</h3>
-                  </div>
-                  <p className="leading-relaxed">You have been provided an invite code by a neighbor.</p>
-                  {method === 'join' && (
-                  <div className="mt-4 pt-4 border-t border-brand-stone animate-in zoom-in">
-                    {/* Label for context */}
-                        <label className="text-label block mb-4 text-center">Enter 6-Digit Invite Code</label>
-                        
-                        {/* Reusing the specialized component */}
-                        <PasscodeInput 
-                          value={inviteCode} 
-                          onChange={setInviteCode} 
-                        />
-                      </div>
-                    )}
-                  </div>
-              </button>
+                <JoinNeighborhood onComplete={handleComplete} coords={coords} isLocationVerified={isLocationVerified} mode={mode} method={method} />
+              </div>
 
-              <button 
+              <div 
                 onClick={() => setMethod('create')}
-                disabled={!isLocationVerified}
-                className={`artisan-card transition-all ${
+                className={`artisan-card transition-all text-center ${
                   method === 'create' ? 'border-brand-terracotta' : 'border-transparent'
                 }`}
               >
-                <div className="p-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="icon-box text-brand-terracotta bg-brand-terracotta/5 border-brand-terracotta/20">
-                      <Home className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-wrap artisan-card-title text-lg">Establish New</h3>
-                  </div>
-                  <p className="leading-relaxed">You are the first resident in this area to register.</p>
-                  <p className='italic'>{isLocationVerified ? '' : 'Verify your location in the previous step to establish a new neighborhood.'}</p>
-                  {method === 'create' && isLocationVerified && (
-                    <div className="mt-4 pt-4 border-t border-brand-terracotta/10 animate-in zoom-in">
-                      <input
-                        className="artisan-input text-sm"
-                        placeholder="Neighborhood Name (e.g. Oak St)"
-                        value={neighborhoodName}
-                        onChange={(e) => setNeighborhoodName(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </button>
-            </div>
-
-            <div className="mt-10">
-              <button 
-                disabled={!method || (method === 'join' && !inviteCode) || (method === 'create' && !neighborhoodName)}
-                className="btn-primary"
-                onClick={() => method === 'join' ? handleJoin() : handleCreate()}
-              >
-                Confirm Registration
-              </button>
+                <CreateNeighborhood onComplete={handleComplete} coords={coords} isLocationVerified={isLocationVerified} method={method} />
+              </div>
             </div>
           </div>
         )}

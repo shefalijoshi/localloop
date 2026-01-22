@@ -130,6 +130,14 @@
            flex items-center justify-center gap-2;
   }
 
+  .btn-tertiary {
+    @apply w-full py-4 bg-brand-stone rounded-2xl capitalize tracking-widest 
+           shadow-xl shadow-brand-stone/10 
+           hover:bg-brand-stone/30 active:scale-[0.98] 
+           transition-all disabled:opacity-50 
+           flex items-center justify-center gap-2;
+  }
+
   /* The base "Artisan Outline" button */
   .btn-outline {
     @apply w-full py-4 rounded-xl text-xs capitalize tracking-widest 
