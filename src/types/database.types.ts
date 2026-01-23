@@ -873,6 +873,65 @@ export type Database = {
           },
         ]
       }
+      system_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          neighborhood_id: string | null
+          profile_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          neighborhood_id?: string | null
+          profile_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          neighborhood_id?: string | null
+          profile_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_events_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_details"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "system_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_with_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       profile_details: {
@@ -1056,6 +1115,10 @@ export type Database = {
         }
         Returns: string
       }
+      find_and_request_join: {
+        Args: { user_lat: number; user_lng: number }
+        Returns: Json
+      }
       generate_invite_code: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
       get_assist_details: { Args: { t_assist_id: string }; Returns: Json }
@@ -1118,6 +1181,7 @@ export type Database = {
         | "pending_second_vouch"
         | "active"
         | "inactive"
+        | "request_pending"
       offer_status: "pending" | "accepted" | "declined" | "cancelled"
       request_status: "active" | "filled" | "expired" | "cancelled" | "archived"
       user_role: "seeker" | "helper" | "caregiver" | "dependent"
@@ -1257,6 +1321,7 @@ export const Constants = {
         "pending_second_vouch",
         "active",
         "inactive",
+        "request_pending",
       ],
       offer_status: ["pending", "accepted", "declined", "cancelled"],
       request_status: ["active", "filled", "expired", "cancelled", "archived"],

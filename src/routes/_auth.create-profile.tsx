@@ -9,7 +9,7 @@ import { CreateNeighborhood } from '../components/CreateNeighborhood'
 
 export const Route = createFileRoute('/_auth/create-profile')({
   beforeLoad: ({ context }) => {
-    if (context.profile?.display_name && context.profile?.neighborhood_id) {
+    if (context.profile?.display_name && context.profile?.neighborhood_id && context.membershipStatus  && context.membershipStatus !== 'request_pending') {
       throw redirect({ to: '/' })
     }
   },
@@ -19,19 +19,18 @@ export const Route = createFileRoute('/_auth/create-profile')({
 function CreateProfileComponent() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { profile } = Route.useRouteContext()
+  const { profile, membershipStatus } = Route.useRouteContext()
   
   const [name, setName] = useState(profile?.display_name || '')
   const [address, setAddress] = useState(profile?.address || '')
   const [coords, setCoords] = useState<{lat:number, lng: number} | null>(null)
-  const [isLocationVerified, setIsLocationVerified] = useState<boolean>(false)
+  const [isLocationVerified, setIsLocationVerified] = useState<boolean>(profile?.location_verified || false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   
   const [step, setStep] = useState<'name' | 'choice' | 'executing'>('name')
-  const [mode, setMode] = useState<'withCode' | 'request'>('withCode');
-  const [method, setMethod] = useState<'join' | 'create' | null>(null)
+  const [method, setMethod] = useState<'join' | 'create' | null>(membershipStatus === 'request_pending' ? 'join' : null)
   const [error, setError] = useState<string | null>(null)
   const [isGettingCoords, setIsGettingCoords] = useState(false)
 
@@ -60,12 +59,21 @@ function CreateProfileComponent() {
     };
   }, [address]);
 
+  const formatDate = (date: Date) => {
+    return date.toISOString().slice(0,16);
+  }
+
   const updateProfile = async () => {
     if (!name || !coords || !address) return
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: name, address: address })
+      .update({ 
+        display_name: name, 
+        address: address, 
+        location_verified: isLocationVerified, 
+        location_verified_at: formatDate(new Date()) 
+      })
       .eq('user_id', user?.id);
     if (error) throw error;
 
@@ -75,11 +83,8 @@ function CreateProfileComponent() {
     setStep('choice')
   };
 
-  const handleComplete = async (type: string) => {
-    if (type !== 'create') {
-      setError(type)
-      setMode('request')
-    } else {
+  const handleComplete = async (success = false) => {
+    if (success) {
       setStep('executing')
       setError(null)
 
@@ -251,7 +256,11 @@ function CreateProfileComponent() {
                   method === 'join' ? 'border-brand-green' : 'border-transparent'
                 }`}
               >
-                <JoinNeighborhood onComplete={handleComplete} coords={coords} isLocationVerified={isLocationVerified} mode={mode} method={method} />
+                <JoinNeighborhood onComplete={handleComplete} 
+                coords={coords} 
+                isLocationVerified={isLocationVerified} 
+                method={method} 
+                profileId={profile?.id} />
               </div>
 
               <div 

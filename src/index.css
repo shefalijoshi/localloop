@@ -314,6 +314,10 @@
     @apply p-6 rounded-2xl bg-brand-green/5 border border-brand-green/10 text-center;
   }
 
+  .alert-info {
+    @apply p-1 italic rounded-xl bg-brand-green/5 border border-brand-green/10 text-center;
+  }
+
   /* Standardized Typography for Alerts */
   .alert-title {
     @apply text-[16px] tracking-tighter block mb-1 text-brand-text;
