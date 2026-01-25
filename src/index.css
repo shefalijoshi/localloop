@@ -58,7 +58,7 @@
     @apply min-h-screen flex flex-col transition-all bg-no-repeat bg-top bg-auto;
     background-color: var(--bento-bg-page);
     background-image: 
-      linear-gradient(rgba(253, 252, 248, 0.7), rgba(253, 252, 248, 0.7)), 
+      linear-gradient(rgba(253, 252, 248, 0.8), rgba(253, 252, 248, 0.8)), 
       url('/hero_background.webp');
   }
 
