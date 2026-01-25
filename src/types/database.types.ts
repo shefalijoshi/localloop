@@ -1087,6 +1087,7 @@ export type Database = {
         Args: { target_offer_id: string }
         Returns: undefined
       }
+      approve_join_request: { Args: { p_membership_id: string }; Returns: Json }
       calculate_distance: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -1126,6 +1127,19 @@ export type Database = {
       get_neighborhood_feed: {
         Args: { filter_categories?: string[] }
         Returns: Json
+      }
+      get_pending_join_requests: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          location_verified: boolean
+          membership_id: string
+          profile_id: string
+          street_name: string
+          vouch_code_expires_at: string
+          vouch_verification_code: string
+        }[]
       }
       get_profile_details: {
         Args: { target_id: string }

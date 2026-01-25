@@ -3,8 +3,7 @@ import { supabase } from "../lib/supabase";
 import { Key } from "lucide-react";
 import { PasscodeInput } from "./PasscodeInput";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { PostgrestError } from "@supabase/supabase-js";
-import { errorCodes } from "../lib/errorCodes";
+import { ErrorMessages, type ErrorCode } from "../lib/errorCodes";
 
 interface JoinNeighborhoodProps {
     coords: { lat: number; lng: number } | null
@@ -68,7 +67,7 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
       onSuccess: async () => {
         onComplete(true)
       },
-      onError: (err: PostgrestError) => setError('Failed to join neighborhood')
+      onError: () => setError('Failed to join neighborhood')
     })
 
     const handleRequest = useMutation({
@@ -84,11 +83,11 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
       },
       onSuccess: async (response:any) => {
         if (response.success === false) {
-          setError(errorCodes[response.error as keyof typeof errorCodes] || 'Unable to complete your request to join neighborhood');
+          setError(ErrorMessages[response.error as ErrorCode] || 'Unable to complete your request to join neighborhood');
         }
         onComplete(false)
       },
-      onError: (err: PostgrestError) => {
+      onError: () => {
         //Special handling for - PENDING_REQUEST, NO_NEIGHBORHOOD_FOUND
         setError('Failed request to join neighborhood')
       }
@@ -105,11 +104,11 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
         if (rpcError) throw rpcError
         return response
       },
-      onSuccess: async (response:any) => {
+      onSuccess: async () => {
         setSupportContacted(true);
         onComplete(false)
       },
-      onError: (err: PostgrestError) => {
+      onError: () => {
         setSupportContacted(false);
         setError('Failed to contact support.')
       }
@@ -139,8 +138,8 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
               </div>
               }
               {membership !== null &&
-                (!contactSupport ? <p className="my-4 alert-info leading-relaxed">Your request to join the neighborhood is being reviewed.</p>
-                  : !supportContacted ? <p className="my-4 alert-info leading-relaxed">Can't wait to be part of the neighborhood any longer? Contact support to proceed.</p> : <p className="leading-relaxed">Your support request has been submitted. Someone will get back to you soon.</p>
+                (!contactSupport ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Your request to join the neighborhood is being reviewed.</p>
+                  : !supportContacted ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Can't wait to be part of the neighborhood any longer? Contact support to proceed.</p> : <p className="leading-relaxed">Your support request has been submitted. Someone will get back to you soon.</p>
                 )
               }
               {(method === 'join' || method === 'request') && <div className="flex space-x-10 mt-6 justify-center">
