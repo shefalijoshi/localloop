@@ -9,7 +9,7 @@ import { CreateNeighborhood } from '../components/CreateNeighborhood'
 
 export const Route = createFileRoute('/_auth/create-profile')({
   beforeLoad: ({ context }) => {
-    if (context.profile?.display_name && context.profile?.neighborhood_id && context.membershipStatus  && context.membershipStatus !== 'request_pending') {
+    if (context.profile?.display_name && context.membershipStatus  && context.membershipStatus !== 'request_pending') {
       throw redirect({ to: '/' })
     }
   },

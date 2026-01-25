@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 
 export const Route = createFileRoute('/_auth/vouch-pending')({
   beforeLoad: ({ context }) => {
-    if (context.membershipStatus === 'active') {
+    if (context.membershipStatus === 'active' || context.membershipStatus === 'request_pending') {
       throw redirect({ to: '/' })
     }
   },

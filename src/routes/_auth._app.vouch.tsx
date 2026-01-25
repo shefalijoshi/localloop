@@ -20,6 +20,7 @@ function VouchEntryPage() {
   const [code, setCode] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
   const [now, setNow] = useState(new Date())
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,6 +58,7 @@ function VouchEntryPage() {
 
   const vouchMutation = useMutation({
     mutationFn: async (enteredCode: string) => {
+      setError(null);
       const { error } = await supabase.rpc('vouch_via_handshake', {
         entered_code: enteredCode,
       })
@@ -69,6 +71,9 @@ function VouchEntryPage() {
       await queryClient.invalidateQueries()
       await router.invalidate()
     },
+    onError: (error: any) => {
+      setError(`Error verifying code: ${error.message}`);
+    }
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,9 +94,10 @@ function VouchEntryPage() {
 
   const approveJoinRequest = useMutation({
     mutationFn: async (id: string) => {
+      setError(null);
       // Calls the RPC we defined to activate the neighbor
       const { error } = await supabase.rpc('approve_join_request', {
-        neighborhood_membership_id: id,
+        p_membership_id: id,
       })
       if (error) throw error
     },
@@ -102,6 +108,9 @@ function VouchEntryPage() {
       await queryClient.invalidateQueries()
       await router.invalidate()
     },
+    onError: (error: any) => {
+      setError(`Error verifying code: ${error.message}`);
+    }
   })
 
   const joinRequests = join_requests?.filter((r: any) => 
@@ -134,7 +143,11 @@ function VouchEntryPage() {
           </div>
           <h1 className="artisan-header-title">Vouch for Neighbor(s)</h1>
         </header>
-  
+        {error && (
+          <div className="alert-error mb-8 animate-in border-dashed">
+            <span className="alert-title mb-0">{error}</span>
+          </div>
+        )}
         {/* The Unified Artisan Card */}
         {joinRequests.length === 0 ? (
           <div className="alert-info border-2 border-dashed mb-4 py-4">
