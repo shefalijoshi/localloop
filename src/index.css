@@ -14,7 +14,7 @@
   --color-brand-terracotta-hover: #A55E42;
   
   /* --- Backgrounds & Surfaces --- */
-  --color-brand-beige: #F9F7F2;  
+  --color-brand-beige: #AFAFA;  
   --color-brand-stone: #F2F0E9;  
   
   /* --- Borders & Outlines --- */
@@ -33,10 +33,15 @@
   --bento-bg-page: #fdfcf8;
   
   /* Bento Energy Palette */
-  --color-trust-blue: rgba(182, 216, 255, 0.9);
-  --color-local-yellow: rgba(255, 243, 197, 0.9);
+  --color-trust-blue: #E8F4F8;
+  --color-trust-blue-icon: #1912E6;
+  --color-local-yellow: #FFF4E6;
+  --color-local-yellow-icon: #E65100;
+
   --color-social-green: rgba(210, 255, 229, 0.9);
-  --color-help-pink: rgba(255, 228, 249, 0.9);
+  --color-help-pink: #F3E8FF;
+  --color-help-pink-icon: #B612E4;
+
   --color-deeds-azure: rgba(233, 244, 255, 0.9);
 }
 
@@ -57,9 +62,6 @@
   .bg-hero-vision {
     @apply min-h-screen flex flex-col transition-all bg-no-repeat bg-top bg-auto;
     background-color: var(--bento-bg-page);
-    background-image: 
-      linear-gradient(rgba(253, 252, 248, 0.8), rgba(253, 252, 248, 0.8)), 
-      url('/hero_background.webp');
   }
 
   .bg-hero-vision-md {
@@ -68,7 +70,7 @@
 
   /* 2. Layout: Bento Grid & Positioning */
   .bento-grid {
-    @apply grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto px-6 mb-12;
+    @apply grid md:grid-cols-3 gap-4 max-w-2xl mx-auto px-6 mb-12;
   }
 
   .card-cta {
@@ -80,12 +82,12 @@
   }
 
   .card-feature {
-    @apply p-2 h-fit flex flex-col gap-2 items-start hover:scale-[1.02] transition-transform;
+    @apply p-2 h-fit flex flex-col gap-2 hover:scale-[1.02] transition-transform;
   }
 
-  .bg-flow {
+  /* .bg-flow {
     @apply lg:bg-no-repeat lg:bg-[url('/vouch_flow.webp')] lg:bg-size-[100%] lg:bg-[70%_30%];
-  }
+  } */
 
   /* 3. Input & Form Elements */
   .input-magic-link {

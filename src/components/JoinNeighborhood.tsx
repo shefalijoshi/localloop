@@ -2,23 +2,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Key } from "lucide-react";
 import { PasscodeInput } from "./PasscodeInput";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ErrorMessages, type ErrorCode } from "../lib/errorCodes";
 
 interface JoinNeighborhoodProps {
     coords: { lat: number; lng: number } | null
     isLocationVerified: boolean
     onComplete: (success: boolean) => void
-    method: string | null,
     profileId: string
 }
 
-export function JoinNeighborhood({ coords, isLocationVerified, onComplete, method, profileId }: JoinNeighborhoodProps) {
+export function JoinNeighborhood({ coords, isLocationVerified, onComplete, profileId }: JoinNeighborhoodProps) {
     const [inviteCode, setInviteCode] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [supportContacted, setSupportContacted] = useState(false)
+    const queryClient = useQueryClient()
 
-    const { data: membership } = useQuery({
+    const { data: membership, isLoading } = useQuery({
       queryKey: ['my-membership'],
       queryFn: async () => {
         const { data, error } = await supabase
@@ -41,7 +41,7 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
       
       const updateTimer = () => {
         const now = Date.now()
-        const diff = Math.max(0, Math.round((now - expiry) / 60000))
+        const diff = 1440 - Math.round((now - expiry) / 60000);
         setMinutesRemaining(diff)
       }
   
@@ -49,8 +49,6 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
       const interval = setInterval(updateTimer, 30000)
       return () => clearInterval(interval)
     }, [membership?.invited_at])
-
-    const contactSupport = minutesRemaining !== null && minutesRemaining <= 0
 
     const handleJoin = useMutation({
       mutationFn: async () => {
@@ -85,6 +83,7 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
         if (response.success === false) {
           setError(ErrorMessages[response.error as ErrorCode] || 'Unable to complete your request to join neighborhood');
         }
+        await queryClient.invalidateQueries({queryKey: ['my-membership']})
         onComplete(false)
       },
       onError: () => {
@@ -114,42 +113,47 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
       }
     })
 
+    const contactSupport = !isLoading && minutesRemaining !== null && minutesRemaining <= 0
+
     return (
-        <div>
+        <div className="space-y-3">
             {error && (
                 <div className="alert-error mb-8 animate-in border-dashed">
                     <span className="alert-title mb-0">{error}</span>
                 </div>
             )}
-            <div className="p-1">
-              <div className="flex items-center gap-4 mb-3">
-              <div className="icon-box text-brand-green">
-                  <Key className="w-4 h-4" />
+            {membership !== null &&
+              (!contactSupport ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Your request to join the neighborhood is being reviewed.</p>
+                : !supportContacted ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Can't wait to be part of the neighborhood any longer? Contact support to proceed.</p> : <p className="leading-relaxed">Your support request has been submitted. Someone will get back to you soon.</p>
+              )
+            }
+            <div className="p-1 pb-6 border-b border-brand-green">
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <Key className="w-4 h-4" />
+                <p className="leading-relaxed">Use an invite code from a neighbor.</p>
               </div>
-              <h3 className="artisan-card-title text-lg">Join Existing</h3>
-              </div>
-              <p className="leading-relaxed">Use an invite code provided by a neighbor. {membership === null ? 'Or request one.' : ''}</p>
-              {(method === 'join' || method === 'request') && 
               <div className="mt-4 pt-4 border-t border-brand-stone animate-in zoom-in">
                   <label className="text-label block mb-4 text-center">Enter 6-Digit Invite Code</label>
                   <PasscodeInput 
                       value={inviteCode} 
                     onChange={setInviteCode}/>
               </div>
-              }
-              {membership !== null &&
-                (!contactSupport ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Your request to join the neighborhood is being reviewed.</p>
-                  : !supportContacted ? <p className="my-4 border-2 border-dashed alert-info leading-relaxed">Can't wait to be part of the neighborhood any longer? Contact support to proceed.</p> : <p className="leading-relaxed">Your support request has been submitted. Someone will get back to you soon.</p>
-                )
-              }
-              {(method === 'join' || method === 'request') && <div className="flex space-x-10 mt-6 justify-center">
+              <div className="flex space-x-10 mt-6 justify-center">
                 <button 
                   disabled={!inviteCode || handleJoin.isPending}
                   className="btn-primary"
                   onClick={() => handleJoin.mutate()}
                 >
-                  Confirm Registration
+                  Submit Code
                 </button>
+              </div>
+            </div>
+            <div className="p-1">
+              <div className="flex items-center gap-4 mb-3">
+                <p className="leading-relaxed text-brand-muted">Don't have a code? Request to join and a neighbor will approve you.</p>
+              </div>
+             
+              <div className="flex space-x-10 mt-6 justify-center">
                 {contactSupport ? <button 
                   disabled={handleContactSupport.isPending || supportContacted}
                   className="btn-tertiary"
@@ -162,11 +166,10 @@ export function JoinNeighborhood({ coords, isLocationVerified, onComplete, metho
                   className="btn-tertiary"
                   onClick={() => handleRequest.mutate()}
                 >
-                  Request an Invite Code
+                  Request to join
                 </button>
                 }
-                </div>
-              }
+              </div>
             </div>
         </div>
     )

@@ -50,10 +50,10 @@ function LoginComponent() {
         </div>
         <header className="p-8 text-center">
           <h1 className="text-xl md:3xl font-bold text-brand-dark mb-4">
-            The neighbors you wave to could become the friends you rely on.
+            Your street. Your neighbors. Real help when you need it.
           </h1>
           <p className="text-sm text-brand-text max-w-md mx-auto">
-            Community starts at your doorstep. This is how neighborhoods come alive.
+          Connect with verified neighbors within walking distance for services, borrowing, and mutual support. No posts. No noise. Just neighbors helping neighbors.
           </p>
         </header>
 
@@ -98,15 +98,7 @@ function LoginComponent() {
                   disabled={loading || !email}
                   className="btn-primary bg-brand-terracotta text-white"
                 >
-                  {loading ? 'Verifying...' : 'Join or Start your neighborhood'}
-                </button>
-
-                <button 
-                  onClick={() => handleAuth('join')} 
-                  disabled={loading || !email}
-                  className="link-standard w-full text-left py-2"
-                >
-                  New? Enter your email to <span className="underline underline-offset-4">Create Account</span>
+                  {loading ? 'Verifying...' : 'Login or Join your neighborhood'}
                 </button>
               </div>
             </div>
@@ -118,46 +110,27 @@ function LoginComponent() {
           <FeatureCard
             Icon={ShieldCheck} 
             index={0}
-            title="Vouched Neighbors" 
-            desc="Verified residents only. Join by invitation. Verify with location or neighbor vouch." 
+            title="Verified Neighbors only" 
+            desc="Invitation + GPS verification keeps your circle trusted." 
             colorClass="card-trust card-main-focus"
-            bgClass="bg-flow"
+            bgClass="text-trust-blue-icon"
           />
 
           <FeatureCard
             Icon={MapPin} 
             index={1}
-            title="Walking Distance" 
-            desc="0.5 miles. Real proximity, real community." 
+            title="Walking Distance only" 
+            desc="Only neighbors within 0.5 miles. No strangers across town" 
             colorClass="card-local" 
+            bgClass="text-local-yellow-icon"
           />
           <FeatureCard 
             Icon={HelpingHand} 
             index={2}
-            title="Help & Borrow" 
-            desc="Ask for what you need. Offer what you can." 
+            title="Requests, not posts" 
+            desc="Ask for help when you need it. No feeds. No drama."
             colorClass="card-help" 
-          />
-          <FeatureCard 
-            Icon={Map} 
-            index={3}
-            title="Know Your Area" 
-            desc="Stay connected to what's happening on your block." 
-            colorClass="card-social" 
-          />
-          <FeatureCard 
-            Icon={DoorOpen} 
-            index={4}
-            title="Meet on the Porch" 
-            desc="The app makes asking easy. The relationship happens in person." 
-            colorClass="card-local" 
-          />
-          <FeatureCard 
-            Icon={Target} 
-            index={5}
-            title="Deeds over Feeds" 
-            desc="Real requests. Real neighbors. No endless scrolling." 
-            colorClass="card-deeds" 
+            bgClass="text-help-pink-icon"
           />
         </div>
       </main>
