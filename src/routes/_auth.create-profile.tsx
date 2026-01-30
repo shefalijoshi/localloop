@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createFileRoute, useRouter, redirect } from '@tanstack/react-router'
 import { supabase } from '../lib/supabase'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getCoordsFromAddress, getDistanceInMeters } from '../lib/geocoding'
-import { User, MapPin, Dot, ChevronLeft, AlertTriangle } from 'lucide-react'
+import { User, MapPin, ChevronLeft, AlertTriangle } from 'lucide-react'
 import { JoinNeighborhood } from '../components/JoinNeighborhood'
 import { CreateNeighborhood } from '../components/CreateNeighborhood'
 
@@ -23,50 +23,45 @@ function CreateProfileComponent() {
   
   const [name, setName] = useState(profile?.display_name || '')
   const [address, setAddress] = useState(profile?.address || '')
-  const [coords, setCoords] = useState<{lat:number, lng: number} | null>(null)
-  const [neighborhood, setNeighborhood] = useState<{id:string, name: string} | null>(null)
   const [isLocationVerified, setIsLocationVerified] = useState<boolean>(profile?.location_verified || false)
-  const [isVerifying, setIsVerifying] = useState(false)
+  const [isGpsVerifying, setIsGpsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   
-  const [step, setStep] = useState<'name' | 'choice' | 'executing'>('name')
+  const [step, setStep] = useState<'name' | 'choice' | 'executing'>(membershipStatus === 'request_pending' ? 'choice' : 'name')
   const [method, setMethod] = useState<'join' | 'create' | null>(membershipStatus === 'request_pending' ? 'join' : null)
   const [error, setError] = useState<string | null>(null)
-  const [isGettingCoords, setIsGettingCoords] = useState(false)
 
-  useEffect(() => {
-    if (address.length < 5) {
-      setCoords(null);
-      setNeighborhood(null);
-      return;
-    }
-    const controller = new AbortController();
-    setIsGettingCoords(true);
-    const delayDebounceFn = setTimeout(async () => {
-      try {
-        const result = await getCoordsFromAddress(address, controller.signal);
-        if (result) {
-          setCoords({ lat: result.lat, lng: result.lng });
-          const { data, error } = await supabase.rpc('find_nearest_neighborhood', {
-            user_lat: result.lat,
-            user_lng: result.lng
-          });
+  const { 
+    data: geoData, 
+    isFetching: isGeoLoading, 
+    error: geoError 
+  } = useQuery({
+    queryKey: ['neighborhood-lookup', address],
+    queryFn: async ({ signal }) => {
+      const result = await getCoordsFromAddress(address, signal);
+      if (!result) throw new Error("Could not find that address.");
   
-          if (!error) setNeighborhood(data);
-        } else {
-          setCoords(null);
-          setNeighborhood(null);
-        }
-      } finally {
-        setIsGettingCoords(false);
-      }
-    }, 600);
-    return () => {
-      clearTimeout(delayDebounceFn);
-      controller.abort();
-    };
-  }, [address]);
+      const { data, error: rpcError } = await supabase.rpc('find_nearest_neighborhood', {
+        user_lat: result.lat,
+        user_lng: result.lng,
+        max_radius_miles: 0.5
+      });
+  
+      if (rpcError) throw rpcError;
+      
+      return {
+        coords: { lat: result.lat, lng: result.lng },
+        neighborhood: data
+      };
+    },
+    enabled: address.length >= 5,
+    staleTime: 5000, 
+    retry: false,
+  });
+  
+  const coords = geoData?.coords || null;
+  const neighborhood = geoData?.neighborhood || null;
 
   const formatDate = (date: Date) => {
     return date.toISOString().slice(0,16);
@@ -86,8 +81,10 @@ function CreateProfileComponent() {
       .eq('user_id', user?.id);
     if (error) throw error;
 
-    if (!isLocationVerified) {
+    if (neighborhood) {
       setMethod('join')
+    } else {
+      setMethod('create')
     }
     setStep('choice')
   };
@@ -112,15 +109,24 @@ function CreateProfileComponent() {
     }
 
     setVerificationError(null);
-    setIsVerifying(true);
+    setIsGpsVerifying(true);
     setIsLocationVerified(false);
 
     const addressCoords: [number, number] = [coords.lng, coords.lat];
+    let watchId: number;
 
-    const watchId = navigator.geolocation.watchPosition(
+    // Set a fallback timer to stop searching after 15s
+    const verifyLocationTimer = setTimeout(() => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      setIsGpsVerifying(false);
+      setVerificationError("Couldn't verify your location. GPS signal might be too weak.");
+    }, 15000);
+
+    watchId = navigator.geolocation.watchPosition(
       (position) => {
-        const userCoords: [number, number] = [position.coords.longitude, position.coords.latitude];
-        setAccuracy(position.coords.accuracy);
+        const { longitude, latitude, accuracy } = position.coords;
+        const userCoords: [number, number] = [longitude, latitude];
+        setAccuracy(accuracy);
 
         const distance = getDistanceInMeters(userCoords, addressCoords);
 
@@ -129,42 +135,31 @@ function CreateProfileComponent() {
           clearTimeout(verifyLocationTimer);
 
           setIsLocationVerified(true);
-          setIsVerifying(false);
+          setIsGpsVerifying(false);
           setVerificationError(null);
 
           updateProfile();
-          setStep('choice');
-
-          if (neighborhood) {
-            setMethod('join');
-          } else {
-            setMethod('create');
-          }
         }
       },
-      (error) => {
-        console.log(error);
+      (err) => {
         navigator.geolocation.clearWatch(watchId);
-        setIsVerifying(false);
         clearTimeout(verifyLocationTimer);
-        setVerificationError("Couldn't verify your location." );
+        setIsGpsVerifying(false);
+        setVerificationError("Location access denied or GPS unavailable.");
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
-
-    const verifyLocationTimer = setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      setIsVerifying(false);
-      setIsLocationVerified(false);
-      setVerificationError("Couldn't verify your location.");
-    }, 15000);
   };
+
+  const activeError = geoError 
+  ? "We couldn't locate that address. Have you entered it correctly?" 
+  : verificationError;
+
 
   const continueUnverified = () => {
     setIsLocationVerified(false); 
     setVerificationError(null); 
     updateProfile(); 
-    setStep('choice');
   }
 
   return (
@@ -227,48 +222,75 @@ function CreateProfileComponent() {
                         }`}
                         placeholder="Enter your street address..."
                         value={address}
+                        disabled={isGpsVerifying}
                         onChange={(e) => {setAddress(e.target.value); setVerificationError(null)}}
                       />
                     </div>
                   </div>
                 </div>
-                {
-                  verificationError && 
-                  <div className='flex items-center bg-local-yellow'>
-                    <AlertTriangle className='w-4 h-4'></AlertTriangle>
-                    <span className="alert-title mb-0 pl-2">{verificationError}</span>
+                {isGeoLoading && (
+                  <div className="status-card-active animate-in">
+                    <div className="spinner-brand h-4 w-4 border-2" />
+                    <p className="text-sm font-bold">Validating address...</p>
                   </div>
-                }
-                { coords && <p className="mt-2 pl-8">
-                  {neighborhood !== null ? `${verificationError !== null ? "No problem! A neighborhood exists here - just get 2 neighbors to vouch for you." : "Good news! There's already a neighborhood here. Verify your location for faster approval - only 1 neighbor needed."}`
-                  : "You're the first one here! Location verification is required to create a new neighborhood."}</p>
-                }
-                { isVerifying &&
-                  <div className='artisan-meta-tiny'><Dot className="animate-ping inline"/> Searching for GPS (Accuracy: {accuracy?.toFixed(0)} meters)</div>
-                }
-                { coords && (
-                  <div className="mt-2 ml-8 text-center md:flex md:gap-4">
+                )}
+                {activeError && (
+                  <div className="status-card-warning animate-in">
+                    <AlertTriangle className="w-5 h-5 text-brand-terracotta shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="text-label text-brand-terracotta/80 mb-1">Heads up</h4>
+                      <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
+                        {activeError}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {coords && (
+                  <div className="text-explanation">
+                    {neighborhood !== null 
+                      ? (verificationError !== null 
+                          ? "No problem! A neighborhood exists here—just get 2 neighbors to vouch for you." 
+                          : "Good news! There's already a neighborhood here. Verify your location for faster approval.")
+                      : (verificationError !== null 
+                          ? "No problem! No neighborhood exists here yet. Verify your location to create one."
+                          : "You're the first one here! Location verification is required to create a new neighborhood.")
+                    }
+                  </div>
+                )}
+                {isGpsVerifying && (
+                  <div className="status-card-active animate-in">
+                    <div className="gps-indicator">
+                      <span className="gps-indicator-ping"></span>
+                      <span className="gps-indicator-dot"></span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-label text-brand-green mb-1">GPS Active</p>
+                      <p className="text-sm font-bold">
+                        Matching with address... <span className="text-brand-muted">({accuracy?.toFixed(0)}m)</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {coords && (
+                  <div className="mt-8 flex flex-col md:flex-row gap-3">
                     <button 
-                    className="btn-primary"
+                      className="btn-primary"
                       type="button"
                       onClick={verifyWithWatch}
-                      disabled={!address || !coords || isVerifying}
+                      disabled={!address || !coords || isGpsVerifying}
                     >
-                      {verificationError !== null ? 'Try verification again': 'Verify and Continue'}
+                      {verificationError !== null ? 'Try Verification Again' : 'Verify & Continue'}
                     </button>
+                    
                     <button 
-                    className="underline mt-4 md:hidden"
+                      className={`btn-tertiary ${!neighborhood ? "hidden" : ""}`}
                       type="button"
-                      onClick={ continueUnverified }
-                      disabled={!address || !coords || isVerifying}
-                    >Continue without verifying</button>
-                    <button 
-                    className="hidden md:block btn-tertiary"
-                      type="button"
-                      onClick={ continueUnverified }
-                      disabled={!address || !coords || isVerifying}
-                    >Continue without verifying</button>
-                </div>
+                      onClick={continueUnverified}
+                      disabled={!address || !coords || isGpsVerifying}
+                    >
+                      Continue without verifying
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -279,33 +301,29 @@ function CreateProfileComponent() {
           <div className="animate-in slide-in-from-bottom-4 duration-700 text-center">
             <button 
               onClick={() => setStep('name')}
-              className="nav-link-back"
+              className="nav-link-back text-label"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Back</span>
             </button>
             <header className="artisan-header">
-              <h2 className="artisan-header-title text-2xl">{ method === 'create' ? "Establish a new neighborhood" : "Join a neighborhood"}</h2>
+              <h2 className="artisan-header-title">{ method === 'create' ? "Establish a new neighborhood" : "Join a neighborhood"}</h2>
               <p className="artisan-header-description">Welcome, {name.split(' ')[0]}!</p>
             </header>
-            <div className="grid gap-5 text-left ">
-              <div 
-                className={`artisan-card transition-all text-center ${
-                  method === 'join' ? 'border-brand-green' : 'border-brand-terracotta'
-                }`}
-              >
-                {method === 'create' && 
-                  <JoinNeighborhood onComplete={handleComplete} 
+            <div className={`artisan-card ${method === 'join' ? 'border-brand-green' : 'border-brand-terracotta'}`}>
+              {method === 'create' ? (
+                <CreateNeighborhood 
+                onComplete={handleComplete} 
+                coords={coords} 
+                />
+              ) : (
+                <JoinNeighborhood 
+                  onComplete={handleComplete} 
                   coords={coords} 
                   isLocationVerified={isLocationVerified} 
                   profileId={profile?.id} 
-                  />}
-                {method === 'join' && 
-                  <CreateNeighborhood 
-                  onComplete={handleComplete} 
-                  coords={coords} 
-                  />}
-              </div>
+                />
+              )}
             </div>
           </div>
         )}

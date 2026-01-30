@@ -1120,6 +1120,10 @@ export type Database = {
         Args: { user_lat: number; user_lng: number }
         Returns: Json
       }
+      find_nearest_neighborhood: {
+        Args: { max_radius_miles?: number; user_lat: number; user_lng: number }
+        Returns: Json
+      }
       generate_invite_code: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
       get_assist_details: { Args: { t_assist_id: string }; Returns: Json }

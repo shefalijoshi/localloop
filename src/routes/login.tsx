@@ -68,7 +68,6 @@ function LoginComponent() {
           </header>
         </div>
 
-        {/* The Action Card - Swapped to artisan-card architecture */}
         <div className="artisan-container-large px-6">
           <div className="artisan-card border-0">
             {message.sent ? (
@@ -93,9 +92,6 @@ function LoginComponent() {
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    /* pl-14 provides enough padding on the left so 
-                      the text doesn't start under the icon 
-                    */
                     className={`artisan-input pl-14 ${
                       emailValid === true ? 'artisan-input-success' : 
                       emailValid === false && email.length > 0 ? 'artisan-input-error' : ''

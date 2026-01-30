@@ -2,7 +2,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* --- High-Tech Young Brand Colors --- */
   --color-brand-green: #00DF82;        
   --color-brand-green-hover: #00C874;
   --color-brand-terracotta: #FF5A5F;   
@@ -23,7 +22,6 @@
   --color-social-green: #DCFCE7;
   --color-help-pink: #F5F3FF;
 
-  /* --- Physics --- */
   --ease-tech: cubic-bezier(0.16, 1, 0.3, 1);
   @keyframes reveal { 
     from { opacity: 0; transform: translateY(12px) scale(0.99); } 
@@ -42,7 +40,6 @@
 }
 
 @layer components {
-  /* --- 1. BUTTONS (Restored for Join/Create flows) --- */
   .btn-primary, .btn-secondary, .btn-tertiary {
     @apply flex items-center justify-center gap-2 w-full py-4.5 rounded-2xl text-[13px] font-black 
            uppercase tracking-[0.15em] transition-all duration-300 hover:-translate-y-1 
@@ -52,7 +49,6 @@
   .btn-secondary { @apply bg-brand-terracotta text-white shadow-brand-terracotta/30 border-t border-white/20; }
   .btn-tertiary { @apply bg-brand-stone text-brand-dark hover:bg-brand-border shadow-none; }
 
-  /* --- 2. ARTISAN SYSTEM (Restored for Profile flow) --- */
   .artisan-page-focus { @apply min-h-screen bg-brand-bg flex flex-col items-center pt-2 pb-20 px-6; }
   .artisan-container-large { @apply w-full max-w-[540px] mx-auto; }
   .artisan-header { @apply text-center mb-10; }
@@ -64,7 +60,6 @@
   .icon-box { @apply w-10 h-10 rounded-xl bg-brand-stone flex items-center justify-center shrink-0; }
   .text-explanation { @apply text-xs leading-relaxed text-brand-dark/70 font-medium bg-brand-stone/30 p-4 rounded-2xl mt-4; }
   
-  /* --- 3. INPUTS & LABELS (Restored) --- */
   .artisan-input {
     @apply w-full px-6 py-4 rounded-2xl outline-none transition-all duration-300 
            text-brand-dark bg-slate-100/50 border-2 border-brand-border;
@@ -75,7 +70,6 @@
     @apply relative w-full;
   }
 
-  /* The icon positioned inside the left side of the input */
   .input-icon {
     @apply absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 
            transition-colors duration-300 pointer-events-none z-10;
@@ -94,7 +88,6 @@
     display: block;
   }
 
-  /* --- 4. GPS & STATUS (Restored for Verification) --- */
   .gps-indicator { @apply relative flex h-3 w-3 shrink-0; }
   .gps-indicator-ping { @apply animate-ping absolute h-full w-full rounded-full bg-brand-green opacity-75; }
   .gps-indicator-dot { @apply relative rounded-full h-3 w-3 bg-brand-green shadow-[0_0_10px_rgba(0,223,130,0.5)]; }
@@ -104,14 +97,12 @@
   .status-card-warning { @apply bg-brand-terracotta/5 border-brand-terracotta/20 text-brand-dark; }
   .spinner-brand { @apply animate-spin rounded-full border-2 border-brand-green border-t-transparent h-5 w-5; }
 
-  /* --- 5. BENTO GRID (Restored and color-mapped) --- */
   .bento-grid { @apply grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 mb-24; }
   .card-feature { 
     @apply relative overflow-hidden transition-all duration-500 rounded-[32px] animate-reveal
            hover:shadow-[0_40px_80px_-15px_rgba(15,23,42,0.1)] hover:-translate-y-2 cursor-pointer
            border border-transparent hover:border-white/40 backdrop-blur-2xl; 
   }
-  /* Using your theme colors with opacity for that high-tech glass look */
   .card-trust { @apply bg-trust-blue; }
   .card-local { @apply bg-local-yellow; }
   .card-social { @apply bg-social-green; }

@@ -1,5 +1,3 @@
-// src/lib/geocoding.ts
-
 export interface GeocodingResult {
   lat: number;
   lng: number;
@@ -20,8 +18,7 @@ export async function getCoordsFromAddress(
     const token = import.meta.env.VITE_MAPBOX_TOKEN;
     if (!token) throw new Error("Mapbox token is missing");
 
-    // We restrict types to 'address' and 'poi' (points of interest) 
-    // to ensure we aren't verifying a whole city or zip code.
+    // Restrict types to 'address' and 'poi' (points of interest)
     const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
       address
     )}.json?access_token=${token}&limit=1&types=address,poi`;
@@ -35,6 +32,9 @@ export async function getCoordsFromAddress(
 
     if (data.features && data.features.length > 0) {
       const feature = data.features[0];
+      if (feature.relevance < 1) {
+        return null;
+      }
       const [lng, lat] = feature.center;
       
       return { 
@@ -46,7 +46,7 @@ export async function getCoordsFromAddress(
     
     return null;
   } catch (error: any) {
-    // If the request was aborted, we don't want to log an error
+    // If the request was aborted, don't log an error
     if (error.name === 'AbortError') return null;
     
     console.error("Geocoding helper error:", error);

@@ -9,67 +9,80 @@ interface CreateNeighborhoodProps {
 }
 
 export function CreateNeighborhood({ coords, onComplete }: CreateNeighborhoodProps) {
-    const [neighborhoodName, setNeighborhoodName] = useState('')
-    const [error, setError] = useState<string | null>(null)
+  const [neighborhoodName, setNeighborhoodName] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
-    const handleCreate = useMutation({
-      mutationFn: async () => {
-        if (!neighborhoodName || !coords) return
-        setError(null)
-        const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
-          neighborhood_name: neighborhoodName.trim(),
-          user_lat: coords.lat,
-          user_lng: coords.lng
-        })
-        if (rpcError) throw rpcError
+  const handleCreate = useMutation({
+    mutationFn: async () => {
+      if (!neighborhoodName || !coords) return
+      setError(null)
+      const { error: rpcError } = await supabase.rpc('initialize_neighborhood', {
+        neighborhood_name: neighborhoodName.trim(),
+        user_lat: coords.lat,
+        user_lng: coords.lng
+      })
+      if (rpcError) throw rpcError
+    },
+    onSuccess: () => {
+      onComplete(true)
+    },
+    onError: (rpcError: any) => {
+      if (rpcError.message?.includes('COLLISION')) {
+        setError(rpcError.message.replace('COLLISION:', ''))
+      } else {
+        setError(rpcError.message || 'Failed to create neighborhood')
       }
-      ,
-      onSuccess: () => {
-        onComplete(true)
-      },
-      onError: (rpcError: any) => {
-        if (rpcError.message.includes('COLLISION')) {
-          setError(rpcError.message.replace('COLLISION:', ''))
-        } else {
-          setError(rpcError.message || 'Failed to create neighborhood')
-        }
-        onComplete(false)
-      }
-    })
+      onComplete(false)
+    }
+  })
 
-    return (
-      <div>
-          {error && (
-              <div className="alert-error mb-8 animate-in border-dashed">
-                  <span className="alert-title mb-0">{error}</span>
+  return (
+    <div className="space-y-6">
+        {error && (
+          <div className="status-card-warning animate-in">
+            <p className="text-sm font-bold leading-tight">{error}</p>
+          </div>
+        )}
+
+        <div className="text-left space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-brand-terracotta/10 rounded-2xl flex items-center justify-center shrink-0">
+                <Home className="w-6 h-6 text-brand-terracotta" />
               </div>
-          )}
-          <div className="p-1">
-              <div className="flex items-center gap-2 mb-3">
-                <Home className="w-6 h-6" />
-                <p className="leading-relaxed text-left">You are the first resident in this area to register.</p>
+              <div>
+                <p className="text-sm font-bold text-brand-dark">Founder Mode</p>
+                <p className="text-xs text-brand-muted font-medium">You're the first resident in this area to register.</p>
               </div>
-              <p className="leading-relaxed text-left">You'll be able to invite and approve neighbors.</p>
-              
-              <div className="mt-4 pt-4 border-t border-brand-terracotta/10 animate-in zoom-in">
-                  <input
-                  className="artisan-input text-sm"
-                  placeholder="Neighborhood Name (e.g. Oak St)"
+            </div>
+
+            <div className="p-4 bg-brand-stone/30 rounded-2xl border border-brand-stone/50">
+              <p className="text-xs leading-relaxed text-brand-dark/70 font-medium">
+                You'll be able to invite and approve neighbors. Establish the name they'll see when they join.
+              </p>
+            </div>
+            
+            <div className="pt-2 animate-in slide-in-from-bottom-2 duration-500">
+                <label className="text-[10px] uppercase tracking-widest font-black text-brand-muted mb-2 block ml-1">
+                  Neighborhood Name
+                </label>
+                <input
+                  className="artisan-input text-base placeholder:text-brand-muted/50"
+                  placeholder="e.g. Oak St"
                   value={neighborhoodName}
                   onChange={(e) => setNeighborhoodName(e.target.value)}
-                  />
-              </div>
-          </div>
-          <div className="mt-10">
-            <button 
-              disabled={!neighborhoodName}
-              className="btn-secondary"
-              onClick={() => handleCreate.mutate()}
-            >
-              Create Neighborhood
-            </button>
-          </div>
-          
-      </div>
-    )
+                />
+            </div>
+        </div>
+
+        <div className="pt-4">
+          <button 
+            disabled={!neighborhoodName || handleCreate.isPending}
+            className="btn-secondary w-full py-4 text-base transition-all active:scale-95"
+            onClick={() => handleCreate.mutate()}
+          >
+            {handleCreate.isPending ? "Establishing..." : "Create Neighborhood"}
+          </button>
+        </div>
+    </div>
+  )
 }
