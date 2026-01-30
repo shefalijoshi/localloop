@@ -112,4 +112,15 @@
   .nav-link-back { @apply flex items-center gap-2 text-brand-muted hover:text-brand-dark transition-colors mb-6; }
   .badge-new {@apply absolute left-0 top-12 bottom-12 w-1 rounded-r-full transition-all duration-500 bg-brand-green}
   .badge-urgent {@apply absolute left-0 top-12 bottom-12 w-1 rounded-r-full transition-all duration-500 bg-brand-terracotta}
+
+  .btn-hud {
+    @apply flex items-center gap-2 px-3 py-1.5 rounded-lg border border-brand-border 
+           bg-white/50 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest
+           transition-all duration-300 hover:border-brand-green/50 hover:text-brand-green
+           active:scale-95 whitespace-nowrap;
+  }
+  
+  .btn-hud-danger {
+    @apply hover:border-brand-terracotta/50 hover:text-brand-terracotta;
+  }
 }

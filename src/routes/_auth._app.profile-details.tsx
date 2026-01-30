@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { MapPin, Mail, ShieldCheck, ChevronLeft, Clock, UserCheck, LogOut, Map } from 'lucide-react'
+import { MapPin, Mail, ShieldCheck, ChevronLeft, LogOut, Map } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/profile-details')({
   component: ProfilePage,
@@ -46,38 +46,6 @@ function ProfilePage() {
     }
   };
 
-  // Mapping status to specific branding logic from index.css
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'active':
-        return { 
-          label: 'Active Member', 
-          classes: 'border-brand-green text-brand-green', 
-          icon: <ShieldCheck className="w-4 h-4" /> 
-        };
-      case 'pending_location':
-        return { 
-          label: 'Location Pending', 
-          classes: 'border-brand-terracotta text-brand-terracotta', 
-          icon: <MapPin className="w-4 h-4" /> 
-        };
-      case 'pending_second_vouch':
-        return { 
-          label: 'Vouch Pending', 
-          classes: 'border-brand-muted text-brand-text', 
-          icon: <UserCheck className="w-4 h-4" /> // Restored UserCheck for vouching
-        };
-      default:
-        return { 
-          label: 'Inactive', 
-          classes: 'border-brand-border text-brand-muted', 
-          icon: <Clock className="w-4 h-4" /> 
-        };
-    }
-  };
-
-  const statusStyle = getStatusConfig(membershipStatus || 'inactive');
-
   if (isLoading) {
     return (
       <div className="loading-focus-state">
@@ -89,93 +57,67 @@ function ProfilePage() {
 
   return (
     <div className="artisan-page-focus">
-      <div className="artisan-container-large px-4">
-        <div className="flex justify-between">
-          <button onClick={() => navigate({ to: '/dashboard' })} className="nav-link-back">
-            <ChevronLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
+      <div className="artisan-container-large">
+        <div className="flex justify-between mb-8">
+          <button onClick={() => navigate({ to: '/dashboard' })} className="btn-hud">
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>Back</span>
           </button>
-          <button className="pill-secondary" onClick={() => handleSignout()}>
-            <LogOut className="w-3 h-3" />
-            <span className="text-sm text-brand-green">Sign out</span>
+          <button className="btn-hud btn-hud-danger" onClick={() => handleSignout()}>
+          <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>
         </div>
-        <header className="artisan-header">
-          <h1 className="artisan-header-title">{fullProfile?.display_name}</h1>
-          <div className={`badge-pill mt-4 border flex items-center justify-center gap-2 mx-auto w-fit ${statusStyle.classes}`}>
-            {statusStyle.icon}
-            <span>{statusStyle.label}</span>
-          </div>
+        <header className="card-feature">
+          <h1 className="artisan-header-title text-center">
+            {fullProfile?.display_name}
+          </h1>
         </header>
 
-        <div className="space-y-6">
-          <section className="artisan-card">
-            {/* artisan-card-inner provides the recessed background */}
-            <div className="artisan-card-inner">
+        <div className="space-y-4">
+          <section className="card-feature border-0 shadow-2xl">
             <div className="detail-row">
-                  <div className="icon-box">
-                    <Mail className="w-4 h-4 text-brand-green" />
-                  </div>
-                  <div>
-                    <p className="text-label block mb-3">Email Address</p>
-                    <p className="text-brand-dark font-medium">{fullProfile?.email}</p>
-                  </div>
-                </div>
-
-                <div className="detail-row">
-                  <div className="icon-box">
-                    <MapPin className="w-4 h-4 text-brand-green" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-label block mb-3">Home Address</p>
-                    <p className="text-brand-dark font-medium leading-relaxed">
-                      {fullProfile?.address}
-                    </p>
-                  </div>
-                </div>
+              <div className="icon-box">
+                <Mail className="w-4 h-4 text-brand-green" />
+              </div>
+              <div>
+                <p className="text-label">Email</p>
+                <p>{fullProfile?.email}</p>
+              </div>
             </div>
+            <div className="detail-row">
+              <div className="icon-box">
+                <MapPin className="w-4 h-4 text-brand-green" />
+              </div>
+              <div>
+                <p className="text-label">Address</p>
+                <p>{fullProfile?.address}</p>
+                <p className="p-0 text-explanation">Your full address is only shared with neighbors once you accept their help or they accept yours.</p>
+              </div>
+            </div>        
           </section>
 
           {neighborhood?.map_image_url && (
-            <section className="artisan-card border-brand-terracotta">
-              <div className="artisan-card-inner">
-                <div className="mb-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="icon-box">
-                      <Map className="w-4 h-4 text-brand-green" />
-                    </div>
-                    <h2 className="text-label text-lg font-semibold">{neighborhood.name} boundary area</h2>
+            <section className="card-feature overflow-hidden border-0 shadow-2xl">
+              <div className="mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="icon-box">
+                    <Map className="w-3.5 h-3.5 text-brand-green" />
                   </div>
+                  <h2 className="text-label text-lg">{neighborhood.name} boundary area</h2>
                 </div>
-                
-                <div className="rounded-lg overflow-hidden border border-brand-green/20 shadow-sm">
+              </div>
+              <div className="relative">
                   <img 
                     src={neighborhood.map_image_url} 
                     alt={`${neighborhood.name} neighborhood boundary map`}
-                    className="w-full h-auto"
+                    className="w-full h-auto object-cover brightness-90 contrast-125"
                   />
-                </div>
-                
-                <div className="mt-4 flex items-start gap-2 text-xs text-brand-muted italic">
-                  <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-brand-green" />
-                  <p className="leading-relaxed">
-                    This map shows the verified boundary of your local neighborhood registry.
-                  </p>
-                </div>
+                <p className="text-explanation">
+                  This map shows the verified boundary of your local neighborhood registry.
+                </p>
               </div>
             </section>
           )}
-
-          {/* Conditional Alerts using brand colors for terracotta (errors) and green (success) */}
-          <div className={`${membershipStatus === 'active' ? 'alert-success' : 'alert-error'} border-dashed`}>
-            <p className="alert-body italic opacity-80 px-4">
-              {membershipStatus === 'active' 
-                ? "Your full address is only shared with neighbors once you accept their help or they accept yours."
-                : membershipStatus === 'pending_location'
-                ? "Verification in progress: We are confirming your neighborhood location."
-                : "Awaiting a second neighbor vouch to activate your account."}
-            </p>
-          </div>
         </div>
       </div>
     </div>
