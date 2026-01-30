@@ -1,348 +1,122 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap');
-
-@import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* --- Primary Brand Colors --- */
-  --color-brand-green: #4A5D4E;
-  --color-brand-green-hover: #3d4d40;
-  --color-brand-terracotta: #BC6C4D; 
-  --color-brand-terracotta-hover: #A55E42;
+  /* --- High-Tech Young Brand Colors --- */
+  --color-brand-green: #00DF82;        
+  --color-brand-green-hover: #00C874;
+  --color-brand-terracotta: #FF5A5F;   
+  --color-brand-terracotta-hover: #FF4449;
   
-  /* --- Backgrounds & Surfaces --- */
-  --color-brand-beige: #AFAFA;  
-  --color-brand-stone: #F2F0E9;  
+  --color-brand-bg: #F8FAFC;           
+  --color-brand-surface: #FFFFFF;
+  --color-brand-stone: #F1F5F9;  
+  --color-brand-border: #E2E8F0;
   
-  /* --- Borders & Outlines --- */
-  --color-brand-border: #C8C4BD;
-  
-  /* --- Typography --- */
-  --color-brand-dark: #2D2D2D;   
-  --color-brand-text: #6B6658;   
-  --color-brand-muted: #A09B8E;  
+  --color-brand-dark: #0F172A;         
+  --color-brand-text: #475569;   
+  --color-brand-muted: #94A3B8;  
 
-  /* --- Animations (Used in Dashboard & Vouch) --- */
-  --animate-in: fade-in 0.5s ease-out;
+  /* --- Bento Palette --- */
+  --color-trust-blue: #E0F2FE;
+  --color-local-yellow: #FEF3C7;
+  --color-social-green: #DCFCE7;
+  --color-help-pink: #F5F3FF;
 
-  --bento-text-main: #1a202c;
-  --bento-text-muted: #4a5568;
-  --bento-bg-page: #fdfcf8;
-  
-  /* Bento Energy Palette */
-  --color-trust-blue: #E8F4F8;
-  --color-trust-blue-icon: #1912E6;
-  --color-local-yellow: #FFF4E6;
-  --color-local-yellow-icon: #E65100;
-
-  --color-social-green: rgba(210, 255, 229, 0.9);
-  --color-help-pink: #F3E8FF;
-  --color-help-pink-icon: #B612E4;
-
-  --color-deeds-azure: rgba(233, 244, 255, 0.9);
+  /* --- Physics --- */
+  --ease-tech: cubic-bezier(0.16, 1, 0.3, 1);
+  @keyframes reveal { 
+    from { opacity: 0; transform: translateY(12px) scale(0.99); } 
+    to { opacity: 1; transform: translateY(0) scale(1); } 
+  }
+  --animate-reveal: reveal 0.6s var(--ease-tech) forwards;
 }
 
 @layer base {
   body {
-    /* Nestig-style "Linen" background */
-    @apply bg-brand-beige text-brand-dark antialiased;
-    font-family: 'Lora', serif;
+    @apply bg-brand-bg text-brand-dark antialiased;
+    font-family: 'Poppins', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
-
-  /* Refined Serif for headings - you can import Lora via Google Fonts */
-  h1, h2, h3, .font-serif {
-    @apply tracking-tight;
-  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
 }
 
 @layer components {
-  .bg-hero-vision {
-    @apply min-h-screen flex flex-col transition-all bg-no-repeat bg-top bg-auto;
-    background-color: var(--bento-bg-page);
+  /* --- 1. BUTTONS (Restored for Join/Create flows) --- */
+  .btn-primary, .btn-secondary, .btn-tertiary {
+    @apply flex items-center justify-center gap-2 w-full py-4.5 rounded-2xl text-[13px] font-black 
+           uppercase tracking-[0.15em] transition-all duration-300 hover:-translate-y-1 
+           active:scale-95 disabled:opacity-50 shadow-lg;
   }
+  .btn-primary { @apply bg-brand-green text-black shadow-brand-green/20; }
+  .btn-secondary { @apply bg-brand-terracotta text-white shadow-brand-terracotta/30 border-t border-white/20; }
+  .btn-tertiary { @apply bg-brand-stone text-brand-dark hover:bg-brand-border shadow-none; }
 
-  .bg-hero-vision-md {
-    @apply bg-contain;
-  }
-
-  /* 2. Layout: Bento Grid & Positioning */
-  .bento-grid {
-    @apply grid md:grid-cols-3 gap-4 max-w-2xl mx-auto px-6 mb-12;
-  }
-
-  .card-cta {
-    @apply p-4 mx-auto md:w-2xl;
-  }
-
-  .card-main-focus {
-    @apply lg:row-span-3 p-4 flex flex-col justify-start h-[100%];
-  }
-
-  .card-feature {
-    @apply p-2 h-fit flex flex-col gap-2 hover:scale-[1.02] transition-transform;
-  }
-
-  /* .bg-flow {
-    @apply lg:bg-no-repeat lg:bg-[url('/vouch_flow.webp')] lg:bg-size-[100%] lg:bg-[70%_30%];
-  } */
-
-  /* 3. Input & Form Elements */
-  .input-magic-link {
-    @apply w-full pl-12 pr-4 py-4 rounded-2xl border-none bg-white shadow-inner text-lg outline-none ring-offset-2;
-    @apply focus:ring-2;
-    focus-within: ring-[var(--terracotta)];
-  }
-
-  /* 4. Semantic Roundness & Glass */
-  .rounded-bento-lg { border-radius: 32px; }
-  .rounded-bento-sm { border-radius: 28px; }
-
-  .glass-morphism {
-    @apply backdrop-blur-md border border-white/50 shadow-sm transition-transform duration-200;
-  }
-
-  /* 5. Color Tokens */
-  .text-vision-main { color: var(--bento-text-main); }
-  .text-vision-muted { color: var(--bento-text-muted); }
-  .bg-brand-terracotta { background-color: var(--terracotta); @apply text-white hover:brightness-110; }
+  /* --- 2. ARTISAN SYSTEM (Restored for Profile flow) --- */
+  .artisan-page-focus { @apply min-h-screen bg-brand-bg flex flex-col items-center pt-2 pb-20 px-6; }
+  .artisan-container-large { @apply w-full max-w-[540px] mx-auto; }
+  .artisan-header { @apply text-center mb-10; }
+  .artisan-header-title { @apply text-3xl font-black text-brand-dark mb-3 tracking-tighter leading-[1.1]; }
+  .artisan-header-description { @apply text-brand-text font-medium opacity-80; }
+  .artisan-card { @apply bg-white/95 backdrop-blur-md rounded-[32px] p-8 border-2 shadow-xl shadow-slate-200/50; }
+  .artisan-meta-tiny { @apply text-[10px] uppercase tracking-wider font-bold text-brand-muted; }
+  .detail-row { @apply flex gap-6 py-6 border-b border-brand-stone; }
+  .icon-box { @apply w-10 h-10 rounded-xl bg-brand-stone flex items-center justify-center shrink-0; }
+  .text-explanation { @apply text-xs leading-relaxed text-brand-dark/70 font-medium bg-brand-stone/30 p-4 rounded-2xl mt-4; }
   
-  .card-trust { background-color: var(--color-trust-blue); }
-  .card-local { background-color: var(--color-local-yellow); }
-  .card-social { background-color: var(--color-social-green); }
-  .card-help { background-color: var(--color-help-pink); }
-  .card-deeds { background-color: var(--color-deeds-azure); }
-  /* The "Primary Action" - Muted Forest Green */
-  .btn-primary {
-    @apply w-full py-4 bg-brand-green text-white rounded-2xl capitalize tracking-widest 
-           shadow-xl shadow-brand-green/10 
-           hover:bg-brand-green-hover active:scale-[0.98] 
-           transition-all disabled:opacity-50 
-           flex items-center justify-center gap-2;
-  }
-
-  /* The "Secondary Action" - Warm Terracotta */
-  .btn-secondary {
-    @apply w-full py-4 bg-brand-terracotta text-white rounded-2xl capitalize tracking-widest 
-           shadow-xl shadow-brand-terracotta/10 
-           hover:bg-brand-terracotta-hover active:scale-[0.98] 
-           transition-all disabled:opacity-50 
-           flex items-center justify-center gap-2;
-  }
-
-  .btn-tertiary {
-    @apply w-full py-4 bg-brand-stone rounded-2xl capitalize tracking-widest 
-           shadow-xl shadow-brand-stone/10 
-           hover:bg-brand-stone/30 active:scale-[0.98] 
-           transition-all disabled:opacity-50 
-           flex items-center justify-center gap-2;
-  }
-
-  /* The base "Artisan Outline" button */
-  .btn-outline {
-    @apply w-full py-4 rounded-xl text-xs capitalize tracking-widest 
-           border transition-all duration-300 active:scale-[0.98]
-           flex items-center justify-center gap-2;
-  }
-
-  .btn-outline-active {
-    @apply bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/10;
-  }
-
-  /* The primary action pill (Request button on Dashboard) */
-  .pill-primary {
-    @apply h-8 px-2 bg-brand-green text-white rounded-full flex items-center gap-1 shadow-sm hover:bg-brand-green-hover transition-colors shrink-0;
-  }
-
-  /* The secondary action pill (Vouch button on Dashboard) */
-  .pill-secondary {
-    @apply h-8 px-2 bg-brand-stone text-brand-green rounded-full flex items-center gap-1 border border-brand-border shadow-sm hover:bg-brand-border transition-colors shrink-0;
-  }
-
-  .artisan-page-focus {
-    @apply min-h-[80vh] flex flex-col items-center;
-  }
-
-  /* Standardizes the responsive width container for focused content */
-  .artisan-container-sm {
-    @apply w-full max-w-sm text-center;
-  }
-
-  .artisan-container-large {
-    @apply w-full max-w-4xl mx-auto text-left;
-  }
-
+  /* --- 3. INPUTS & LABELS (Restored) --- */
   .artisan-input {
-    @apply w-full bg-white border-2 border-brand-border rounded-2xl 
-           px-6 py-4 outline-none transition-all 
-           text-brand-dark placeholder:text-brand-text/60
-           focus:border-brand-green focus:shadow-sm focus:shadow-brand-green/5;
+    @apply w-full px-6 py-4 rounded-2xl outline-none transition-all duration-300 
+           text-brand-dark bg-slate-100/50 border-2 border-brand-border;
+  }
+  .artisan-input:focus { @apply border-brand-terracotta ring-4 ring-brand-terracotta/10 bg-white; }
+
+  .input-group {
+    @apply relative w-full;
   }
 
-  .input-adornment-wrapper {
-    @apply relative flex items-center;
+  /* The icon positioned inside the left side of the input */
+  .input-icon {
+    @apply absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 
+           transition-colors duration-300 pointer-events-none z-10;
   }
 
-  .input-adornment-right {
-    @apply absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center;
+  .artisan-input-success {
+    @apply border-brand-green/50 bg-brand-green/5;
   }
 
-  /* Standardizes the page intro section */
-  .artisan-header {
-    @apply mb-10 text-center;
+  .artisan-input-error {
+    @apply border-brand-terracotta/50 bg-brand-terracotta/5;
   }
 
-  .artisan-header-title {
-    @apply text-3xl font-serif text-brand-dark;
+  .text-label { 
+    @apply text-[11px] font-black uppercase tracking-[0.25em] text-brand-muted/90 select-none; 
+    display: block;
   }
 
-  .artisan-header-description {
-    @apply mt-4 text-sm text-brand-text leading-relaxed;
-  }
+  /* --- 4. GPS & STATUS (Restored for Verification) --- */
+  .gps-indicator { @apply relative flex h-3 w-3 shrink-0; }
+  .gps-indicator-ping { @apply animate-ping absolute h-full w-full rounded-full bg-brand-green opacity-75; }
+  .gps-indicator-dot { @apply relative rounded-full h-3 w-3 bg-brand-green shadow-[0_0_10px_rgba(0,223,130,0.5)]; }
+  
+  .status-card-active, .status-card-warning { @apply flex items-center gap-4 p-5 rounded-2xl border transition-all; }
+  .status-card-active { @apply bg-brand-green/5 border-brand-green/20 text-brand-dark; }
+  .status-card-warning { @apply bg-brand-terracotta/5 border-brand-terracotta/20 text-brand-dark; }
+  .spinner-brand { @apply animate-spin rounded-full border-2 border-brand-green border-t-transparent h-5 w-5; }
 
-  .artisan-tooltip {
-    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 
-           bg-brand-dark text-white text-[9px] rounded-lg
-           opacity-0 group-hover:opacity-100 transition-opacity 
-           pointer-events-none z-10 shadow-xl;
+  /* --- 5. BENTO GRID (Restored and color-mapped) --- */
+  .bento-grid { @apply grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 mb-24; }
+  .card-feature { 
+    @apply relative overflow-hidden transition-all duration-500 rounded-[32px] animate-reveal
+           hover:shadow-[0_40px_80px_-15px_rgba(15,23,42,0.1)] hover:-translate-y-2 cursor-pointer
+           border border-transparent hover:border-white/40 backdrop-blur-2xl; 
   }
+  /* Using your theme colors with opacity for that high-tech glass look */
+  .card-trust { @apply bg-trust-blue; }
+  .card-local { @apply bg-local-yellow; }
+  .card-social { @apply bg-social-green; }
+  .card-help { @apply bg-help-pink; }
 
-  /* Optional: Arrow/Pointer for the tooltip */
-  .artisan-tooltip::after {
-    content: '';
-    @apply absolute top-full left-1/2 -translate-x-1/2 
-           border-4 border-transparent border-t-brand-dark;
-  }
-
-  .artisan-toggle-btn {
-    @apply py-3 rounded-xl text-[14px] capitalize tracking-widest transition-all border-2;
-  }
-
-  /* The 'Active' state matching your brand green */
-  .artisan-toggle-btn-active {
-    @apply border-brand-green bg-brand-green text-white;
-  }
-
-  /* The 'Inactive' state matching your brand stone */
-  .artisan-toggle-btn-inactive {
-    @apply border-brand-stone text-brand-muted hover:border-brand-border;
-  }
-
-  .artisan-card {
-    @apply p-2 bg-white rounded-r-[2rem] rounded-l-[0.5rem] border-l-3 border-brand-terracotta
-           shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-           transition-all duration-500 ease-out disabled:opacity-50;
-  }
-
-  /* The inner recessed area for cards */
-  .artisan-card-inner {
-    @apply bg-brand-stone/50 rounded-[1.8rem] py-10 px-6;
-  }
-
-  /* For card headings like the Dog's Name */
-  .artisan-card-title {
-    @apply font-serif text-brand-dark text-sm truncate block;
-  }
-
-  .card-instruction-text {
-    @apply text-sm text-brand-text leading-relaxed px-4;
-  }
-
-  /* For the tiny metadata like Dog Size or Status */
-  .artisan-meta-tiny {
-    @apply text-[12px] text-brand-text tracking-tighter block;
-  }
-
-  /* Standardizes the container for invite/verification codes */
-  .artisan-code-display {
-    @apply bg-white border border-brand-border rounded-xl py-6 shadow-inner 
-           flex items-center justify-center;
-  }
-
-  /* Standardizes the high-visibility monospace code text */
-  .text-passcode {
-    @apply text-4xl font-mono font-bold tracking-[0.3em] text-brand-dark ml-[0.3em];
-  }
-
-  .text-passcode-expired {
-    @apply opacity-60 grayscale;
-  }
-
-  /* Metadata Labels (Security Status, Dog Size, Timestamps) */
-  .text-label {
-    @apply text-[16px] font-bold capitalize tracking-[0.1em] text-brand-text;
-  }
-
-  .text-verified {
-    @apply mt-3 text-[14px] text-brand-muted font-bold flex items-center gap-1.5 ml-1;
-  }
-
-  /* Standardizes "Back" buttons - We repeat the label logic instead of @applying it */
-  .nav-link-back {
-    @apply flex items-center gap-2 text-brand-text hover:text-brand-green 
-           transition-colors mb-6 text-[14px] capitalize tracking-[0.1em];
-  }
-
-  /* Standardizes data rows (Icon + Text) */
-  .detail-row {
-    @apply flex gap-2 py-3 border-b border-brand-border/40 last:border-0;
-  }
-
-  /* Standardizes the small circles behind icons */
-  .icon-box {
-    @apply h-6 w-6 bg-brand-stone/50 rounded-full flex items-center 
-           justify-center shadow-sm border border-brand-border shrink-0;
-  }
-
-  /* Security/Status Badges */
-  .badge-pill {
-    @apply inline-block px-3 py-1 bg-brand-stone rounded-full 
-           text-[14px] capitalize tracking-[0.1em] font-bold text-brand-text;
-  }
-
-  /* Security/Status Badges 2 */
-  .badge-pill-light {
-    @apply inline-block px-3 py-1 text-[14px] tracking-[0.1em] text-brand-terracotta;
-  }
-
-  /* Standardized Alert Containers */
-  .alert-error {
-    @apply mt-6 p-4 rounded-xl bg-brand-terracotta/5 border border-brand-terracotta/10 text-center;
-  }
-
-  .alert-success {
-    @apply p-6 rounded-2xl bg-brand-green/5 border border-brand-green/10 text-center;
-  }
-
-  .alert-info {
-    @apply p-1 italic rounded-xl bg-brand-green/5 border border-brand-green/10 text-center;
-  }
-
-  /* Standardized Typography for Alerts */
-  .alert-title {
-    @apply text-[16px] tracking-tighter block mb-1 text-brand-text;
-  }
-
-  .alert-body {
-    @apply text-[16px] text-brand-text block;
-  }
-
-  .link-standard {
-    @apply text-brand-text hover:text-brand-green disabled:text-brand-muted 
-    transition-colors duration-300 flex items-center justify-center gap-2;
-  }
-
-  .loading-focus-state {
-    @apply text-center py-20 animate-in;
-  }
-
-  .spinner-brand {
-    @apply h-12 w-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin mx-auto mb-6;
-  }
-
-  .partial-border-circle {
-    @apply border-8 rounded-full w-10 h-10 border-r-transparent border-t-transparent border-b-transparent border-l-red-500
-  }
+  .loading-focus-state { @apply flex flex-col items-center justify-center gap-4 py-20; }
+  .nav-link-back { @apply flex items-center gap-2 text-brand-muted hover:text-brand-dark transition-colors mb-6; }
 }
