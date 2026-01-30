@@ -38,7 +38,7 @@ export function VouchRequestCard({ request, currentTime = new Date().getTime(), 
   const badge = getBadge();
 
   return (
-    <div className="card-feature card-trust group relative overflow-visible px-6 pt-6"
+    <div className="card-feature card-trust group relative overflow-visible px-3 pt-6"
     >
       {badge && badge.label === 'Urgent' && (
         <div className="badge-urgent"/>
@@ -71,17 +71,16 @@ export function VouchRequestCard({ request, currentTime = new Date().getTime(), 
         </div>       
         
         {/* Metadata Details */}
-        <div className="detail-row flex-wrap gap-y-4 items-center justify-between border-t border-brand-stone pt-4 mt-2">
+        <div className="detail-row flex-wrap gap-y-4 items-center justify-between mt-2">
           {!request.location_verified && (
             <div className="flex items-center gap-2">
               <div className="gps-indicator">
-                <span className="gps-indicator-ping"></span>
                 <span className="gps-indicator-dot"></span>
               </div>
               <span className="artisan-meta-tiny">Location Verified</span>
             </div>
           )}
-          <div className="flex items-center gap-4 ml-auto sm:ml-0">
+          <div className="flex items-center gap-4 ml-0 md:ml-auto">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-brand-terracotta" /> 
               <span className="artisan-meta-tiny font-mono">

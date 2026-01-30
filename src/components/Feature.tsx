@@ -13,7 +13,7 @@ export function FeatureCard({ Icon, title, desc, colorClass, index = null }: Fea
     
     return (
       <div 
-        className={`card-feature ${colorClass} p-8 flex flex-col items-center text-center`}
+        className={`card-feature ${colorClass} p-4 flex flex-col items-center text-center`}
         style={{ 
           animationDelay: index !== null ? `${(index + 2) * 150}ms` : '0ms',
         }}

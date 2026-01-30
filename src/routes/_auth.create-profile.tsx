@@ -163,185 +163,187 @@ function CreateProfileComponent() {
   }
 
   return (
-    <div className="artisan-page-focus pt-2 pb-20 px-6">
-      <div className="artisan-container-large">
-        <div className="flex items-center justify-center mb-1">
-          <img 
-            src="/logo.png" 
-            alt="LocalLoop" 
-            className="h-10 w-auto"
-          />
-          <span className="text-2xl font-bold text-brand-terracotta">LocalLoop</span>
-        </div>
-        {error && (
-          <div className="alert-error mb-8 animate-in border-dashed">
-            <span className="alert-title mb-0">{error}</span>
+    <main className="flex-1 w-full mx-auto px-6 pt-6">
+      <div className="artisan-page-focus">
+        <div className="artisan-container-large">
+          <div className="flex items-center justify-center mb-1">
+            <img 
+              src="/logo.png" 
+              alt="LocalLoop" 
+              className="h-10 w-auto"
+            />
+            <span className="text-2xl font-bold text-brand-terracotta">LocalLoop</span>
           </div>
-        )}
+          {error && (
+            <div className="alert-error mb-8 animate-in border-dashed">
+              <span className="alert-title mb-0">{error}</span>
+            </div>
+          )}
 
-        {step === 'name' && (
-          <div className="animate-in slide-in-from-bottom-4 duration-700">
-            <header className="artisan-header">
-              <h1 className="artisan-header-title">Set Up Your Profile</h1>
-              <p className="artisan-header-description">
-                Step 1 of 2: Help neighbors recognize you.
-              </p>
-            </header>
+          {step === 'name' && (
+            <div className="animate-in slide-in-from-bottom-4 duration-700">
+              <header className="artisan-header">
+                <h1 className="artisan-header-title">Set Up Your Profile</h1>
+                <p className="artisan-header-description">
+                  Step 1 of 2: Help neighbors recognize you.
+                </p>
+              </header>
 
-            <div className="artisan-card border-brand-green">
-              <div className="space-y-2 text-left">
-                
-                {/* Name Input Group */}
-                <div className="detail-row border-b-0 pb-0 items-start">
-                  <div className="icon-box">
-                    <User className="w-4 h-4 text-brand-green" />
+              <div className="artisan-card border-brand-green">
+                <div className="space-y-2 text-left">
+                  
+                  {/* Name Input Group */}
+                  <div className="detail-row border-b-0 pb-0 items-start">
+                    <div className="icon-box">
+                      <User className="w-4 h-4 text-brand-green" />
+                    </div>
+                    <div className="flex-1">
+                    <label className="text-label block mb-3 ml-1">How should neighbors know you?</label>
+                    <input
+                      className="artisan-input text-sm"
+                      placeholder="e.g. Julianne Graham or Julie"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                  <label className="text-label block mb-3 ml-1">How should neighbors know you?</label>
-                  <input
-                    className="artisan-input text-sm"
-                    placeholder="e.g. Julianne Graham or Julie"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+
+                  {/* Address Input Group */}
+                  <div className="detail-row border-b-0 items-start">
+                    <div className="icon-box">
+                      <MapPin className="w-4 h-4 text-brand-green" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-label block ml-1">Residential Address</label>   
+                        <p className="artisan-meta-tiny italic mb-3">Only visible to verified neighbors within 0.5 miles</p>
+                        <div className="input-adornment-wrapper">
+                        <input
+                          className={`artisan-input text-sm pr-12 transition-all duration-500 ${
+                            coords ? 'border-brand-green/40 bg-brand-stone' : ''
+                          }`}
+                          placeholder="Enter your street address..."
+                          value={address}
+                          disabled={isGpsVerifying}
+                          onChange={(e) => {setAddress(e.target.value); setVerificationError(null)}}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {isGeoLoading && (
+                    <div className="status-card-active animate-in">
+                      <div className="spinner-brand h-4 w-4 border-2" />
+                      <p className="text-sm font-bold">Validating address...</p>
+                    </div>
+                  )}
+                  {activeError && (
+                    <div className="status-card-warning animate-in">
+                      <AlertTriangle className="w-5 h-5 text-brand-terracotta shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="text-label text-brand-terracotta/80 mb-1">Heads up</h4>
+                        <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
+                          {activeError}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {coords && (
+                    <div className="text-explanation">
+                      {neighborhood !== null 
+                        ? (verificationError !== null 
+                            ? "No problem! A neighborhood exists here—just get 2 neighbors to vouch for you." 
+                            : "Good news! There's already a neighborhood here. Verify your location for faster approval.")
+                        : (verificationError !== null 
+                            ? "No problem! No neighborhood exists here yet. Verify your location to create one."
+                            : "You're the first one here! Location verification is required to create a new neighborhood.")
+                      }
+                    </div>
+                  )}
+                  {isGpsVerifying && (
+                    <div className="status-card-active animate-in">
+                      <div className="gps-indicator">
+                        <span className="gps-indicator-ping"></span>
+                        <span className="gps-indicator-dot"></span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-label text-brand-green mb-1">GPS Active</p>
+                        <p className="text-sm font-bold">
+                          Matching with address... <span className="text-brand-muted">({accuracy?.toFixed(0)}m)</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {coords && (
+                    <div className="mt-8 flex flex-col md:flex-row gap-3">
+                      <button 
+                        className="btn-primary"
+                        type="button"
+                        onClick={verifyWithWatch}
+                        disabled={!address || !coords || isGpsVerifying}
+                      >
+                        {verificationError !== null ? 'Try Verification Again' : 'Verify & Continue'}
+                      </button>
+                      
+                      <button 
+                        className={`btn-tertiary ${!neighborhood ? "hidden" : ""}`}
+                        type="button"
+                        onClick={continueUnverified}
+                        disabled={!address || !coords || isGpsVerifying}
+                      >
+                        Continue without verifying
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 'choice' && (
+            <div className="animate-in slide-in-from-bottom-4 duration-700 text-center">
+              <button 
+                onClick={() => setStep('name')}
+                className="nav-link-back text-label"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+              <header className="artisan-header">
+                <h2 className="artisan-header-title">{ method === 'create' ? "Establish a new neighborhood" : "Join a neighborhood"}</h2>
+                <p className="artisan-header-description">Welcome, {name.split(' ')[0]}!</p>
+              </header>
+              <div className={`artisan-card ${method === 'join' ? 'border-brand-green' : 'border-brand-terracotta'}`}>
+                {method === 'create' ? (
+                  <CreateNeighborhood 
+                  onComplete={handleComplete} 
+                  coords={coords} 
                   />
-                  </div>
-                </div>
-
-                {/* Address Input Group */}
-                <div className="detail-row border-b-0 items-start">
-                  <div className="icon-box">
-                    <MapPin className="w-4 h-4 text-brand-green" />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-label block ml-1">Residential Address</label>   
-                      <p className="artisan-meta-tiny italic mb-3">Only visible to verified neighbors within 0.5 miles</p>
-                      <div className="input-adornment-wrapper">
-                      <input
-                        className={`artisan-input text-sm pr-12 transition-all duration-500 ${
-                          coords ? 'border-brand-green/40 bg-brand-stone' : ''
-                        }`}
-                        placeholder="Enter your street address..."
-                        value={address}
-                        disabled={isGpsVerifying}
-                        onChange={(e) => {setAddress(e.target.value); setVerificationError(null)}}
-                      />
-                    </div>
-                  </div>
-                </div>
-                {isGeoLoading && (
-                  <div className="status-card-active animate-in">
-                    <div className="spinner-brand h-4 w-4 border-2" />
-                    <p className="text-sm font-bold">Validating address...</p>
-                  </div>
-                )}
-                {activeError && (
-                  <div className="status-card-warning animate-in">
-                    <AlertTriangle className="w-5 h-5 text-brand-terracotta shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="text-label text-brand-terracotta/80 mb-1">Heads up</h4>
-                      <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
-                        {activeError}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {coords && (
-                  <div className="text-explanation">
-                    {neighborhood !== null 
-                      ? (verificationError !== null 
-                          ? "No problem! A neighborhood exists here—just get 2 neighbors to vouch for you." 
-                          : "Good news! There's already a neighborhood here. Verify your location for faster approval.")
-                      : (verificationError !== null 
-                          ? "No problem! No neighborhood exists here yet. Verify your location to create one."
-                          : "You're the first one here! Location verification is required to create a new neighborhood.")
-                    }
-                  </div>
-                )}
-                {isGpsVerifying && (
-                  <div className="status-card-active animate-in">
-                    <div className="gps-indicator">
-                      <span className="gps-indicator-ping"></span>
-                      <span className="gps-indicator-dot"></span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-label text-brand-green mb-1">GPS Active</p>
-                      <p className="text-sm font-bold">
-                        Matching with address... <span className="text-brand-muted">({accuracy?.toFixed(0)}m)</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {coords && (
-                  <div className="mt-8 flex flex-col md:flex-row gap-3">
-                    <button 
-                      className="btn-primary"
-                      type="button"
-                      onClick={verifyWithWatch}
-                      disabled={!address || !coords || isGpsVerifying}
-                    >
-                      {verificationError !== null ? 'Try Verification Again' : 'Verify & Continue'}
-                    </button>
-                    
-                    <button 
-                      className={`btn-tertiary ${!neighborhood ? "hidden" : ""}`}
-                      type="button"
-                      onClick={continueUnverified}
-                      disabled={!address || !coords || isGpsVerifying}
-                    >
-                      Continue without verifying
-                    </button>
-                  </div>
+                ) : (
+                  <JoinNeighborhood 
+                    onComplete={handleComplete} 
+                    coords={coords} 
+                    isLocationVerified={isLocationVerified} 
+                    profileId={profile?.id} 
+                  />
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 'choice' && (
-          <div className="animate-in slide-in-from-bottom-4 duration-700 text-center">
-            <button 
-              onClick={() => setStep('name')}
-              className="nav-link-back text-label"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-            <header className="artisan-header">
-              <h2 className="artisan-header-title">{ method === 'create' ? "Establish a new neighborhood" : "Join a neighborhood"}</h2>
-              <p className="artisan-header-description">Welcome, {name.split(' ')[0]}!</p>
-            </header>
-            <div className={`artisan-card ${method === 'join' ? 'border-brand-green' : 'border-brand-terracotta'}`}>
-              {method === 'create' ? (
-                <CreateNeighborhood 
-                onComplete={handleComplete} 
-                coords={coords} 
-                />
-              ) : (
-                <JoinNeighborhood 
-                  onComplete={handleComplete} 
-                  coords={coords} 
-                  isLocationVerified={isLocationVerified} 
-                  profileId={profile?.id} 
-                />
-              )}
+          {step === 'executing' && (
+            <div className="loading-focus-state">
+              <div className="spinner-brand" />
+              <h3 className="artisan-header-title text-xl">Securing Profile</h3>
+              <p className="artisan-header-description">Connecting to your neighborhood...</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 'executing' && (
-          <div className="loading-focus-state">
-            <div className="spinner-brand" />
-            <h3 className="artisan-header-title text-xl">Securing Profile</h3>
-            <p className="artisan-header-description">Connecting to your neighborhood...</p>
-          </div>
-        )}
-
-        <footer className="mt-12 text-center mb-8">
-          <p className="text-brand-muted">
-            Verified Residents Only
-          </p>
-        </footer>
+          <footer className="mt-12 text-center mb-8">
+            <p className="text-brand-muted">
+              Verified Residents Only
+            </p>
+          </footer>
+        </div>
       </div>
-    </div>
+    </main>  
   )
 }

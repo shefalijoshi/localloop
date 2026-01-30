@@ -93,7 +93,7 @@ function VouchPendingPage() {
   })
 
   if (isLoading) return (
-    <div className="artisan-page-focus flex items-center justify-center">
+    <div className="artisan-page-focus justify-center">
       <div className="loading-focus-state">
         <div className="spinner-brand"></div>
         <p className="artisan-meta-tiny">Verifying Security Status...</p>
@@ -106,64 +106,66 @@ function VouchPendingPage() {
   const showCode = (!activeCode && !isLoading) || isExpired
 
   return (
-    <div className="artisan-page-focus pt-12 pb-20 px-6">
-      <div className="artisan-container-sm">
-        <div className="flex flex-col items-center mb-8">
-          <img 
-            src="/logo.png" 
-            alt="LocalLoop" 
-            className="h-16 w-auto mb-3"
-          />
-          <span className="text-2xl font-bold text-brand-green">LocalLoop</span>
-        </div>
-        
-        <header className="artisan-header">
-          <SecurityBadge isExpired={isExpired} />
-          <h1 className="artisan-header-title">Verification Pass</h1>
-          {isExpired 
-              ? (
-              <p className="artisan-header-description">Your security code has expired. Please generate a new one.</p>)
-              : <p className="artisan-header-description">
-                  We were unable to determine your location. Please present this code to a verified neighbor.
-                </p>
-          }
-        </header>
+    <main className="flex-1 w-full mx-auto px-6 pt-6">
+      <div className="artisan-page-focus">
+        <div className="artisan-container-sm">
+          <div className="flex flex-col items-center mb-8">
+            <img 
+              src="/logo.png" 
+              alt="LocalLoop" 
+              className="h-16 w-auto mb-3"
+            />
+            <span className="text-2xl font-bold text-brand-green">LocalLoop</span>
+          </div>
+          
+          <header className="artisan-header">
+            <SecurityBadge isExpired={isExpired} />
+            <h1 className="artisan-header-title">Verification Pass</h1>
+            {isExpired 
+                ? (
+                <p className="artisan-header-description">Your security code has expired. Please generate a new one.</p>)
+                : <p className="artisan-header-description">
+                    We were unable to determine your location. Please present this code to a verified neighbor.
+                  </p>
+            }
+          </header>
 
-        <div className={`artisan-card transition-colors duration-500 ${isExpired ? 'border-brand-terracotta' : 'border-brand-green'}`}>
-          <div className="artisan-card-inner p-4 text-center">
-            <span className="artisan-meta-tiny mb-6 uppercase tracking-widest block">
-              Resident Security Code
-            </span>
-            
-            {/* Restored the Passcode component usage */}
-            <Passcode code={activeCode} isExpired={isExpired} />
-            
-            <TimerLabel minutes={minutesRemaining} isExpired={isExpired} />
+          <div className={`artisan-card transition-colors duration-500 ${isExpired ? 'border-brand-terracotta' : 'border-brand-green'}`}>
+            <div className="artisan-card-inner p-4 text-center">
+              <span className="artisan-meta-tiny mb-6 uppercase tracking-widest block">
+                Resident Security Code
+              </span>
+              
+              {/* Restored the Passcode component usage */}
+              <Passcode code={activeCode} isExpired={isExpired} />
+              
+              <TimerLabel minutes={minutesRemaining} isExpired={isExpired} />
 
-            {showCode && (
+              {showCode && (
+                <button 
+                  onClick={() => requestVouch.mutate()}
+                  disabled={requestVouch.isPending}
+                  className="btn-primary mt-8"
+                >
+                  {requestVouch.isPending ? 'Generating...' : 'Generate New Code'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!isExpired && (
+            <div className="mt-12 space-y-6 text-center animate-in fade-in">
               <button 
                 onClick={() => requestVouch.mutate()}
                 disabled={requestVouch.isPending}
-                className="btn-primary mt-8"
+                className="link-standard mx-auto border-b border-brand-green pb-1"
               >
-                {requestVouch.isPending ? 'Generating...' : 'Generate New Code'}
+                {requestVouch.isPending ? 'Refreshing...' : 'Reset Security Code'}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-
-        {!isExpired && (
-          <div className="mt-12 space-y-6 text-center animate-in fade-in">
-            <button 
-              onClick={() => requestVouch.mutate()}
-              disabled={requestVouch.isPending}
-              className="link-standard mx-auto border-b border-brand-green pb-1"
-            >
-              {requestVouch.isPending ? 'Refreshing...' : 'Reset Security Code'}
-            </button>
-          </div>
-        )}
       </div>
-    </div>
+    </main>  
   )
 }
