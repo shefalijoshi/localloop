@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { ChevronLeft } from 'lucide-react'
+import { AlertTriangle, ChevronLeft } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/_app/invite')({
   component: InvitePage,
@@ -58,53 +58,66 @@ function InvitePage() {
           <span>Back to Dashboard</span>
         </button>
         <header className="artisan-header">
-          <div className="badge-pill mb-4">Network Expansion</div>
+          <div className="mb-4 font-mono flex gap-2 justify-center items-center">
+            <div className='gps-indicator'>
+              <span className='gps-indicator-dot'></span>
+            </div>
+            <p>Network Expansion</p>
+          </div>
           <h1 className="artisan-header-title">Invite a Neighbor</h1>
-          <p className="artisan-header-description">
-            Invite codes allow new residents to join your specific neighborhood boundary.
-          </p>
         </header>
+
+        {createInvite.isError && (
+          <div className="status-card-warning animate-reveal">
+            <AlertTriangle className="w-5 h-5 text-brand-terracotta shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-label text-brand-terracotta/80 mb-1">Code generation failed</h4>
+              <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
+                Please try again.
+              </p>
+          </div>
+        </div>
+        )}
 
         <div className="artisan-card border-brand-green">
           <div className="artisan-card-inner">
             {!inviteCode ? (
               <div className="space-y-6 w-full">
-                <p className="text-sm text-brand-text italic leading-relaxed px-4">
-                  "Each code is valid for 24 hours and can be used to authenticate one new household."
+                <p className="text-explanation">
+                  Invite codes can be used to authenticate one new neighbor in your specific neighborhood boundary. Each code is valid for <em>24 hours</em>.
                 </p>
-                <button
+                {!createInvite.isPending && <button
                   onClick={() => createInvite.mutate()}
                   disabled={createInvite.isPending}
                   className="btn-primary"
-                >
-                  {createInvite.isPending ? 'GENERATING...' : 'CREATE INVITE CODE'}
-                </button>
+                >Create invite code</button>}
+                {createInvite.isPending && <div className="mb-4 font-mono flex gap-2 justify-center items-center">
+                  <div className='gps-indicator'>
+                    <span className='gps-indicator-dot'></span>
+                  </div>
+                  <p>Generating code...</p>
+                </div>}
               </div>
             ) : (
               <div className="space-y-8 w-full animate-in zoom-in-95 duration-300">
                 <div>
-                  <label className="text-label block mb-4">Your Unique Code</label>
-                  <div className="artisan-code-display">
-                    <span className="text-passcode">{inviteCode}</span>
+                  <label className="block mb-4 text-label">Your Unique Code</label>
+                  <div className="artisan-input font-mono">
+                    <span>{inviteCode}</span>
                   </div>
+                  <div className="artisan-meta-tiny text-brand-terracotta text-right">Expires: 24 Hours</div>
                 </div>
 
                 <div className="space-y-3">
                   <button
                     onClick={handleCopy}
-                    className={`btn-outline ${
-                      isCopied 
-                        ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/10' 
-                        : 'bg-white border-brand-border text-brand-green hover:bg-brand-stone'
-                    }`}
-                  >
-                    {isCopied ? 'COPIED TO CLIPBOARD' : 'COPY CODE'}
+                    className={`${isCopied ? 'btn-primary' : 'btn-secondary'}`}>
+                    {isCopied ? 'Copied to clipboard' : 'Copy code'}
                   </button>
                   
                   <button
                     onClick={() => setInviteCode(null)}
-                    className="link-standard w-full py-2 underline underline-offset-4"
-                  >
+                    className="btn-tertiary">
                     Create another
                   </button>
                 </div>
@@ -112,13 +125,6 @@ function InvitePage() {
             )}
           </div>
         </div>
-
-        {createInvite.isError && (
-          <div className="alert-error">
-            <span className="alert-title text-brand-terracotta">Generation Failed</span>
-            <span className="alert-body">Please check your connection and try again.</span>
-          </div>
-        )}
       </div>
     </div>
   )
