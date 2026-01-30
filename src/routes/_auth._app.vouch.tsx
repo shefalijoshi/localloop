@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { ChevronLeft } from 'lucide-react'
+import { AlertTriangle, ChevronLeft, Key, Verified } from 'lucide-react'
 import { isAfter } from 'date-fns/isAfter'
 import { VouchRequestCard, type JoinRequestProps } from '../components/VouchRequestCard'
 
@@ -67,7 +67,6 @@ function VouchEntryPage() {
     onSuccess: async () => {
       setIsSuccess(true)
       
-      // Refresh local state and global context
       await queryClient.invalidateQueries()
       await router.invalidate()
     },
@@ -78,13 +77,11 @@ function VouchEntryPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Ensure we only submit if the code is complete
     if (code.length === 6 && !vouchMutation.isPending) {
       vouchMutation.mutate(code)
     }
   }
 
-  // Helper to handle input and keep it clean
   const handleInputChange = (val: string) => {
     const cleaned = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
     if (cleaned.length <= 6) {
@@ -95,7 +92,6 @@ function VouchEntryPage() {
   const approveJoinRequest = useMutation({
     mutationFn: async (id: string) => {
       setError(null);
-      // Calls the RPC we defined to activate the neighbor
       const { error } = await supabase.rpc('approve_join_request', {
         p_membership_id: id,
       })
@@ -104,7 +100,6 @@ function VouchEntryPage() {
     onSuccess: async () => {
       setIsSuccess(true)
       
-      // Refresh local state and global context
       await queryClient.invalidateQueries()
       await router.invalidate()
     },
@@ -117,19 +112,6 @@ function VouchEntryPage() {
     isAfter(new Date(r.vouch_code_expires_at), now)
   ) || []
 
-  // SUCCESS VIEW
-  if (isSuccess) {
-    return (
-      <div className="artisan-page-focus">
-        <div className="artisan-container-sm max-w-sm">
-          <h1 className="artisan-header-title">Neighborhood Expanded</h1>
-          <p className="artisan-header-description mb-2">"Their residency is now verified by your word."</p>
-          <button onClick={() => navigate({ to: '/' })} className="btn-primary px-8">Finish</button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="artisan-page-focus">
       <div className="artisan-container-large">
@@ -138,48 +120,74 @@ function VouchEntryPage() {
           <span>Back to Dashboard</span>
         </button>
         <header className="artisan-header">
-          <div className="badge-pill mb-4">
-            Security: Handshake
+          <div className="mb-4 font-mono flex gap-2 justify-center items-center">
+            <div className='gps-indicator'>
+              <span className='gps-indicator-dot'></span>
+            </div>
+            <p>Security: Handshake</p>
           </div>
           <h1 className="artisan-header-title">Vouch for Neighbor(s)</h1>
         </header>
         {error && (
-          <div className="alert-error mb-8 animate-in border-dashed">
-            <span className="alert-title mb-0">{error}</span>
+          <div className="status-card-warning animate-in">
+            <AlertTriangle className="w-5 h-5 text-brand-terracotta shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-label text-brand-terracotta/80 mb-1">Heads up</h4>
+              <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
+                {error}
+              </p>
+            </div>
           </div>
         )}
-        {/* The Unified Artisan Card */}
+        {isSuccess && (
+          <div className="status-card-active animate-in">
+            <Verified className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-label text-brand-terracotta/80 mb-1">Neighborhood Expanded</h3>
+              <p className="text-sm font-bold tracking-tight text-brand-dark leading-tight">
+              Their residency is now verified by your word.
+              </p>
+            </div>
+          </div>
+        )}
         {joinRequests.length === 0 ? (
-          <div className="alert-info border-2 border-dashed mb-4 py-4">
-            <p className="alert-body italic opacity-80 px-8 text-center">
-              "When new neighbors want to join, their requests will appear here."
-            </p>
+          <div className="artisan-card border-brand-stone mb-4 py-4 text-center">
+            <div className="text-explanation">
+              When new neighbors want to join, their requests will appear here.
+            </div>
           </div>
         ) : (
-          <div className="flex-1">
+          <div className="space-y-4">
             <h2 className="text-label mb-2">Requests to join</h2>
+            <div className="grid grid-cols-1 gap-4">
             {joinRequests.map((req: JoinRequestProps) => 
             <VouchRequestCard key={req.membership_id} 
               disabled={vouchMutation.isPending}
               request={req} 
               currentTime={now.getTime()} 
               onApprove={() => approveJoinRequest.mutate(req.membership_id)}/>)}
+            </div>
           </div>
         )}
-        <h2 className="text-label mt-6 mb-2">Enter a security code</h2>
-        <div className="artisan-card">
-          <div className="artisan-card-inner p-2 text-center">
+        <div className="artisan-card border-brand-green mt-6">
+          <div className="text-center py-4 border-b border-brand-stone/50">
+            <div className="flex flex-col items-center gap-2 mb-6">
+              <div className="h-10 w-10 bg-brand-green/10 rounded-full flex items-center justify-center">
+                <Key className="w-5 h-5 text-brand-green" />
+              </div>
+              <p className="text-sm font-medium text-brand-muted leading-relaxed">Use a security code from a neighbor.</p>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-10">
               <PasscodeInput 
                 value={code} 
                 onChange={handleInputChange} 
                 disabled={vouchMutation.isPending} 
               />
-  
+
               <button
                 type="submit"
                 disabled={code.length < 6 || vouchMutation.isPending}
-                className="btn-primary mt-8"
+                className="btn-primary"
               >
                 {vouchMutation.isPending ? 'Verifying...' : 'Authorize Access'}
               </button>

@@ -1,5 +1,5 @@
 import { format, differenceInMinutes } from 'date-fns';
-import { Clock, StarIcon, SparklesIcon, UserPlus, Lock, MapPinCheck } from 'lucide-react';
+import { Clock, StarIcon, SparklesIcon, UserPlus, Lock } from 'lucide-react';
 
 export interface JoinRequestProps {
   membership_id: string;
@@ -19,9 +19,7 @@ interface VouchRequestCardProps {
   disabled: boolean;
 }
 
-export function VouchRequestCard({ request, currentTime = new Date().getTime(), onApprove, disabled }: VouchRequestCardProps) {
-  const heading = `${request?.display_name || 'Your neighbor'} at ${request?.street_name || 'unknown location'}`;
-    
+export function VouchRequestCard({ request, currentTime = new Date().getTime(), onApprove, disabled }: VouchRequestCardProps) {    
   const vouchCodeExpirationTime = new Date(request.vouch_code_expires_at);
   const minutesTillExpiration = differenceInMinutes(vouchCodeExpirationTime, currentTime);
 
@@ -40,76 +38,62 @@ export function VouchRequestCard({ request, currentTime = new Date().getTime(), 
   const badge = getBadge();
 
   return (
-    <div className={`block artisan-card border-brand-green p-2 mb-2 hover:shadow-md transition-shadow group relative overflow-visible`}
+    <div className="card-feature card-trust group relative overflow-visible px-6 pt-6"
     >
       {badge && badge.label === 'Urgent' && (
-        <div className="absolute -top-7 -right-7 z-20 rotate-12 flex items-center justify-center">
-          <StarIcon
-            size={58} 
-            className="text-red-500 fill-red-500 drop-shadow-md" 
-            strokeWidth={1}
-          />
-          <div className="absolute flex flex-col items-center justify-center text-white">
-            <span className="text-[10px] font-black tracking-tighter leading-none">
-              Urgent
-            </span>
-          </div>
-        </div>
+        <div className="badge-urgent"/>
       )}
       {badge && badge.label === 'New' && (
-        <div className="absolute -top-7 -right-7 z-20 flex items-center justify-center">
-          <SparklesIcon 
-            size={58} 
-            className="text-yellow-300 fill-yellow-300 drop-shadow-sm" 
-            strokeWidth={1}
-          />
-          <div className="absolute flex flex-col items-center justify-center text-brand-dark">
-            <span className="text-[12px] font-black tracking-tighter leading-none">
-              New
-            </span>
-          </div>
-        </div>
+        <div className="badge-new"/>
       )}
-      <div className="flex flex-col gap-">
+      <div className="flex flex-col gap-6 md:gap-2">
         {/* Header Section */}
-        <div className="flex justify-between items-start">
-          <div className="flex gap-3 items-center">
-            <div className={`icon-box mb-2 transition-transform group-hover:scale-110 bg-brand-green border-none text-white shadow-md`}>
-              <UserPlus className="w-5 h-5" />
+        <div className="flex flex-col sm:flex-row sm:items-center items-start justify-between gap-4">
+          <div className="flex gap-4 items-start flex-1 min-w-0">
+            <div className="icon-box">
+              <UserPlus className="w-5 h-5 text-brand-green" />
             </div>
-            <div className="flex flex-col">
-              <h3 className="artisan-card-title text-wrap !text-xl">
-                {heading}
+            <div className="flex flex-col min-w-0">
+              <h3 className="artisan-header-title !text-lg !mb-0 truncate">
+                {request?.display_name || 'Neighbor'}
               </h3>
+              <span className="text-brand-text font-medium opacity-70 text-sm truncate">
+                at {request?.street_name || 'unknown location'}
+              </span>
             </div>
           </div>
           <button
             onClick={onApprove}
             disabled={disabled}
-            className="pill-primary">
+            className="btn-primary !py-2 !px-6 w-auto shrink-0 shadow-sm w-full sm:w-auto">
               Approve
           </button>
         </div>       
         
         {/* Metadata Details */}
-        <div className="flex items-center gap-1 justify-between mt-1 pt-1 border-t border-brand-stone">
+        <div className="detail-row flex-wrap gap-y-4 items-center justify-between border-t border-brand-stone pt-4 mt-2">
           {!request.location_verified && (
-            <div className={`flex items-center gap-1 artisan-meta-tiny`}>
-              <MapPinCheck className="w-5 h-5 text-brand-green" />
-              <span className="text-brand-muted">Location Verified</span>
+            <div className="flex items-center gap-2">
+              <div className="gps-indicator">
+                <span className="gps-indicator-ping"></span>
+                <span className="gps-indicator-dot"></span>
+              </div>
+              <span className="artisan-meta-tiny">Location Verified</span>
             </div>
           )}
-          <div className="flex items-center gap-1 justify-end">
-            <Clock className="w-5 h-5 text-brand-terracotta" /> 
-            <span className="text-brand-muted artisan-meta-tiny">
-              Approve by {format(new Date(vouchCodeExpirationTime), 'eeeeee p')}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 justify-end px-2 py-1 rounded-lg">
-            <Lock className="w-3 h-3" /> 
-            <span className="text-xs text-brand-muted font-mono tracking-tighter">
-              {request.vouch_verification_code}
-            </span>
+          <div className="flex items-center gap-4 ml-auto sm:ml-0">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-brand-terracotta" /> 
+              <span className="artisan-meta-tiny font-mono">
+                Approve by {format(new Date(vouchCodeExpirationTime), 'eeeeee p')}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-brand-stone/50 px-3 py-1 rounded-md border border-brand-border/50">
+              <Lock className="w-3 h-3 text-brand-muted" /> 
+              <span className="text-[11px] font-black font-mono tracking-wider text-brand-dark">
+                {request.vouch_verification_code}
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -110,4 +110,6 @@
 
   .loading-focus-state { @apply flex flex-col items-center justify-center gap-4 py-20; }
   .nav-link-back { @apply flex items-center gap-2 text-brand-muted hover:text-brand-dark transition-colors mb-6; }
+  .badge-new {@apply absolute left-0 top-12 bottom-12 w-1 rounded-r-full transition-all duration-500 bg-brand-green}
+  .badge-urgent {@apply absolute left-0 top-12 bottom-12 w-1 rounded-r-full transition-all duration-500 bg-brand-terracotta}
 }
