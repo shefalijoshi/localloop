@@ -9,7 +9,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "db:types": "supabase gen types typescript --project-id zujegwodzuvmihglklln --schema public > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --project-id zujegwodzuvmihglklln --schema public > src/types/database.types.ts",
+    "db:pull": "supabase db pull --schema public",
+    "db:diff": "supabase db diff --schema public",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop"
   },
   "dependencies": {
     "@supabase-cache-helpers/postgrest-react-query": "^1.13.6",
@@ -37,7 +41,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
-    "supabase": "^2.70.5",
+    "supabase": "^2.67.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "npm:rolldown-vite@7.2.5"
