@@ -82,7 +82,7 @@ function CreateHelpDetailComponent() {
   })
 
   return (
-    <div className="artisan-page-focus pt-8">
+    <div className="artisan-page-focus">
       <div className="artisan-container-large">
         <header className="artisan-header">
           <div className="icon-box mx-auto mb-4 bg-brand-green/10 text-brand-green border-brand-green/20">

@@ -95,7 +95,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="pb-2 artisan-page-focus">
+    <div className="artisan-page-focus">
       {/* Action Pills */}
       <div className="artisan-container-large flex items-center justify-end gap-3 mb-10">
         <Link to="/create-request" className="pill-primary" search={{ 

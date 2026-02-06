@@ -133,8 +133,8 @@ function CreateRequestPage() {
   const isCustomRequest = selectedAction?.id === 'custom_service' || selectedAction?.id === 'custom_item'
 
   return (
-    <div className="artisan-page-focus py-2">
-      <div className="artisan-container-large mx-auto">
+    <div className="artisan-page-focus">
+      <div className="artisan-container-large">
         {/* --- Level 1: Category Selection --- */}
         {step === 1 && <CategoryGrid onBack={handleBack} onSelect={handleCategorySelect}/>}
 

@@ -79,7 +79,7 @@ export function AssistCard({ assist, currentProfileId }: AssistCardProps) {
         )}
         
         {/* Metadata: Category Tag & Duration/Return Date */}
-        <div className="detail-row py-2">
+        <div className="detail-row">
           <div className="flex flex-wrap items-center gap-3 w-full">
             <span className="badge-pill hidden sm:inline-flex">
               {assist.subject_tag}
